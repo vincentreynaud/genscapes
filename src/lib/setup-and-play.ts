@@ -1,4 +1,4 @@
-import { getCompressor, getDelay, getFilter, getGain, getOscillator } from "../lib/audio-helpers";
+import { getCompressor, getDelay, getFilter, getGain, getOscillator } from "./audio-helpers";
 import { Note } from "@tonaljs/tonal";
 import { random, round } from "lodash";
 import { pickRandomElement } from "../utils";
