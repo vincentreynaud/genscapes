@@ -1,7 +1,6 @@
 import { Scale } from "@tonaljs/tonal";
 import { random } from "lodash";
-import { DroneParams, playDrone, setup } from "../lib/setup-and-play";
-import "../styles/index.css";
+import { DroneParams, playDrone, setup } from "./setup-and-play";
 import { moveOctave } from "../utils";
 
 const SCALE_NAME = `F1 minor six pentatonic`;
