@@ -1,36 +1,52 @@
-import play from "../lib/collective-anxiety-drone";
 import RangeInput from "./RangeInput";
 import "../styles/index.scss";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getDelay, getFilter, getGain, getOscillator } from "../lib/audio-helpers";
 import { random, range, round } from "lodash";
 import { Note, Scale } from "@tonaljs/tonal";
 import { pickRandomElement } from "../utils";
+import Oscillator from "../lib/Oscillator";
+import context from "./Context";
 
-const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+type NotesState = {
+  default: string[];
+  scales: string[];
+  octaves: number[];
+  root: string;
+  scaleType: string;
+  scaleName: string;
+  scale: string[];
+  octave: string;
+};
+
+type AppState = {
+  currentNoteIndex: number;
+  currentNote: string;
+  currentFreq: number;
+  currentNoteLength: number;
+  currentDetune: number;
+  nextNoteTime: number;
+  delayIsOn: boolean;
+};
 
 function App() {
-  const [ctx, setCtx] = useState<AudioContext>(new AudioContext());
+  const { ctx } = useContext(context);
   const [nodes, setNodes] = useState<Record<string, AudioNode | null>>({
     masterVolume: null,
     delayNode: null,
     reverbGain: null,
   });
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [appState, setAppState] = useState({
-    currentNoteIndex: 0,
-    delayIsOn: false,
-  });
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const [notes, setNotes] = useState<Record<string, any>>({
+  const [notes, setNotes] = useState<NotesState>({
     default: Note.names(["C", "C#", "Dd", "D", "Eb", "E", "F", "F#", "Gb", "G", "Ab", "A", "Bb", "B"]),
     scales: Scale.names(),
     octaves: range(1, 8),
-    root: null,
-    scaleType: null,
-    scaleName: null,
-    scale: null,
-    octave: null,
+    root: "",
+    scaleType: "",
+    scaleName: "",
+    scale: [],
+    octave: "",
   });
 
   const [params, setParams] = useState({
@@ -41,10 +57,10 @@ function App() {
     attack: 0.3,
     sustain: 0.8,
     release: 0.3,
-    noteLength: 2,
-    randomiseNoteLength: 0.6,
-    spacing: 5,
-    randomiseSpacing: 0.5,
+    noteLength: 3,
+    randomiseNoteLength: 0,
+    spacing: 2,
+    randomiseSpacing: 0,
     modulationAmount: 0.2,
     modulationRate: 25,
     delayAmount: 0,
@@ -55,29 +71,28 @@ function App() {
     reverbFilterQ: 0.3,
   });
 
-  let {
-    volume,
-    randomiseDetune,
-    detune,
-    waveform, // OscillatorType | undefined
-    attack,
-    sustain,
-    release,
-    noteLength,
-    randomiseNoteLength,
-    spacing,
-    randomiseSpacing,
-    modulationAmount,
-    modulationRate,
-    delayAmount,
-    delayTime,
-    delayFeedback,
-    reverbAmount,
-    reverbFilterFreq,
-    reverbFilterQ,
-  } = params;
+  const [randoms, setRandoms] = useState({
+    minSpacing: calcMin(params.spacing, params.randomiseSpacing),
+    maxSpacing: calcMax(params.spacing, params.randomiseSpacing),
+    minDetune: calcMin(params.detune, params.randomiseDetune),
+    maxDetune: calcMax(params.detune, params.randomiseDetune),
+    minNoteLength: calcMin(params.noteLength, params.randomiseNoteLength),
+    maxNoteLength: calcMax(params.noteLength, params.randomiseNoteLength),
+  });
+
+  const [playState, setPlayState] = useState<AppState>({
+    currentNoteIndex: 0,
+    currentNote: "",
+    currentFreq: 333,
+    currentNoteLength: round(random(randoms.minNoteLength, randoms.maxNoteLength, true), 2),
+    currentDetune: round(random(randoms.minDetune, randoms.maxDetune, true)),
+    nextNoteTime: round(random(randoms.minSpacing, randoms.maxSpacing, true), 2),
+    delayIsOn: false,
+  });
 
   useEffect(() => {
+    let { volume, delayAmount, delayTime, delayFeedback, reverbAmount, reverbFilterFreq, reverbFilterQ } = params;
+
     const masterVolume = getGain(ctx, volume);
     masterVolume.connect(ctx.destination);
 
@@ -109,22 +124,55 @@ function App() {
   useEffect(() => {
     const scaleType = pickRandomElement(notes.scales);
     const root = pickRandomElement(notes.default);
-    const octave = pickRandomElement(notes.octaves);
+    const octave = pickRandomElement(notes.octaves).toString();
     const scaleName = `${root}${octave} ${scaleType}`;
-    setNotes({ ...notes, root });
-    setNotes({ ...notes, octave });
-    setNotes({ ...notes, scaleType });
-    setNotes({ ...notes, scaleName });
-    setNotes({ ...notes, scale: Scale.get(scaleName).notes });
-    console.log("init notes", root, octave, scaleName);
+    setNotes({ ...notes, root, octave, scaleType, scaleName, scale: Scale.get(scaleName).notes });
   }, []);
 
-  let minNoteLength = calcMin(noteLength, randomiseNoteLength);
-  let maxNoteLength = calcMax(noteLength, randomiseNoteLength);
-  let minSpacing = calcMin(spacing, randomiseSpacing);
-  let maxSpacing = calcMax(spacing, randomiseSpacing);
-  let minDetune = calcMin(detune, randomiseDetune);
-  let maxDetune = calcMax(detune, randomiseDetune);
+  useEffect(() => {
+    const currentNoteLength = round(random(randoms.minNoteLength, randoms.maxNoteLength, true), 2);
+    const currentDetune = round(random(randoms.minDetune, randoms.maxDetune, true));
+    const currentNote = notes.scale[playState.currentNoteIndex];
+    const currentFreq = round(Note.freq(currentNote) as number, 2);
+    const nextNoteTime = round(random(randoms.minSpacing, randoms.maxSpacing, true), 2);
+    setPlayState({ ...playState, currentNote, currentFreq, currentNoteLength, currentDetune, nextNoteTime });
+  }, [
+    notes.scale,
+    playState.currentNoteIndex,
+    randoms.minNoteLength,
+    randoms.maxNoteLength,
+    randoms.minDetune,
+    randoms.maxDetune,
+    randoms.minSpacing,
+    randoms.maxSpacing,
+  ]);
+
+  useEffect(() => {
+    const minSpacing = calcMin(params.spacing, params.randomiseSpacing);
+    const maxSpacing = calcMax(params.spacing, params.randomiseSpacing);
+    setRandoms({ ...randoms, minSpacing, maxSpacing });
+  }, [params.spacing, params.randomiseSpacing]);
+
+  useEffect(() => {
+    const minDetune = calcMin(params.detune, params.randomiseDetune);
+    const maxDetune = calcMax(params.detune, params.randomiseDetune);
+    setRandoms({ ...randoms, minDetune, maxDetune });
+  }, [params.detune, params.randomiseDetune]);
+
+  useEffect(() => {
+    const minNoteLength = calcMin(params.noteLength, params.randomiseNoteLength);
+    const maxNoteLength = calcMax(params.noteLength, params.randomiseNoteLength);
+    setRandoms({ ...randoms, minNoteLength, maxNoteLength });
+  }, [params.noteLength, params.randomiseNoteLength]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      nodes.masterVolume?.connect(ctx.destination);
+      noteLoop();
+    } else {
+      nodes.masterVolume?.disconnect();
+    }
+  }, [isPlaying]);
 
   function setCurrentScale(note: string, octave: string, scaleType: string) {
     const scaleName = `${note}${octave} ${scaleType}`;
@@ -132,65 +180,61 @@ function App() {
     setNotes({ ...notes, root: note, octave, scaleType, scaleName, scale });
   }
 
-  function playCurrentNote() {
-    const osc = getOscillator(ctx, { type: waveform } as any);
-    const noteGain = getGain(ctx, 0);
-    const currentNoteLength = round(random(minNoteLength, maxNoteLength, true), 2);
-    const currentDetune = round(random(minDetune, maxDetune, true));
-    const endTime = ctx.currentTime + currentNoteLength;
-    console.log(`Note length: [ ${minNoteLength} - ${maxNoteLength} ]: ${currentNoteLength}s`);
-    noteGain.gain.setValueAtTime(0, 0);
-    noteGain.gain.linearRampToValueAtTime(sustain, endTime * attack);
-    noteGain.gain.setValueAtTime(sustain, endTime - currentNoteLength * release);
-    noteGain.gain.linearRampToValueAtTime(0, endTime - 0.2); // avoid clipping
+  const playCurrentNote = () => {
+    console.log(playState.currentFreq, 187);
+    const { waveform, attack, sustain, release, modulationAmount, modulationRate, noteLength } = params;
+    const { minNoteLength, maxNoteLength } = randoms;
+    const { currentNote, currentFreq, currentNoteLength, currentDetune } = playState;
 
-    const lfoGain = getGain(ctx, modulationAmount);
-    lfoGain.connect(osc.frequency);
-
-    const lfo = ctx.createOscillator();
-    lfo.frequency.setValueAtTime(modulationRate, 0);
-    lfo.start(0);
-    lfo.stop(ctx.currentTime + noteLength);
-    lfo.connect(lfoGain);
-
-    const currentNote = notes.scale[appState.currentNoteIndex];
-    osc.frequency.setValueAtTime(Note.freq(currentNote) as number, 0);
-    osc.detune.setValueAtTime(currentDetune, 0);
-    console.log("Note:", currentNote, round(osc.frequency.value, 2), "detune", round(osc.detune.value, 2));
-    osc.start(0);
-    osc.stop(endTime);
-    osc.connect(noteGain);
+    const osc = new Oscillator(ctx, {
+      type: waveform as OscillatorType,
+      detune: currentDetune,
+      attack,
+      release,
+      sustain,
+      noteLength,
+    });
 
     const { masterVolume, delayNode, reverbGain } = nodes;
+    osc.connect(masterVolume);
+    osc.connect(delayNode);
+    osc.connect(reverbGain);
 
-    // console.log(masterVolume, delayNode, reverbGain);
-    if (masterVolume !== null) noteGain.connect(masterVolume);
-    if (delayNode !== null) noteGain.connect(delayNode);
-    if (reverbGain !== null) noteGain.connect(reverbGain);
-  }
+    // const lfoGain = getGain(ctx, modulationAmount);
+    // lfoGain.connect(osc.frequency);
+
+    // const lfo = ctx.createOscillator();
+    // lfo.frequency.setValueAtTime(modulationRate, 0);
+    // lfo.start(0);
+    // lfo.stop(ctx.currentTime + noteLength);
+    // lfo.connect(lfoGain);
+
+    console.log("Note:", currentNote);
+    osc.play(currentFreq, ctx.currentTime);
+  };
 
   function togglePlay() {
     if (!isPlaying) {
       setIsPlaying(true);
-      setTimeout(() => noteLoop(), 1000);
     } else {
       setIsPlaying(false);
     }
   }
 
   function nextNote() {
-    setAppState({ ...appState, currentNoteIndex: random(0, notes.scale.length - 1) });
+    const currentNoteIndex = random(0, notes.scale.length - 1);
+    setPlayState({ ...playState, currentNoteIndex });
   }
 
   function noteLoop() {
-    const nextNoteTime = round(random(minSpacing, maxSpacing, true), 2);
-    console.log(`Next note: [ ${minSpacing} - ${maxSpacing} ]: ${nextNoteTime}s`);
+    const { minSpacing, maxSpacing } = randoms;
+    console.log(`Next note: [ ${minSpacing} - ${maxSpacing} ]: ${playState.nextNoteTime}s`);
     if (isPlaying) {
       playCurrentNote();
       nextNote();
-      window.setTimeout(() => {
+      setTimeout(() => {
         noteLoop();
-      }, nextNoteTime * 1000);
+      }, playState.nextNoteTime * 1000);
     }
   }
 

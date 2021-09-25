@@ -36,7 +36,7 @@ export default function RangeInput({ label, min, max, step, unit, initValue, onC
           min={min}
           max={max}
           step={step || 0.1}
-          onChange={handleInput}
+          onInput={handleInput}
         />
         <span className="control-value">{formatValue(value, unit)}</span>
       </div>
