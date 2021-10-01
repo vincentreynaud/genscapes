@@ -1,17 +1,18 @@
 import RangeInput from "./RangeInput";
 import "../styles/index.scss";
-import { useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { getDelay, getFilter, getGain, getOscillator } from "../lib/audio-helpers";
 import { random, range, round } from "lodash";
 import { Note, Scale } from "@tonaljs/tonal";
 import { pickRandomElement } from "../utils";
 import Oscillator from "../lib/Oscillator";
-import context from "./Context";
+import context from "./AudioCtxContext";
+import * as Tone from "tone";
+import { Gain, Pattern, PolySynth, Synth } from "tone";
+import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from "../lib/constants";
+import { calcMax, calcMin } from "../helpers";
 
 type NotesState = {
-  default: string[];
-  scales: string[];
-  octaves: number[];
   root: string;
   scaleType: string;
   scaleName: string;
@@ -29,19 +30,21 @@ type AppState = {
   delayIsOn: boolean;
 };
 
-function App() {
-  const { ctx } = useContext(context);
-  const [nodes, setNodes] = useState<Record<string, AudioNode | null>>({
+type State = {
+  pattern: Pattern<any> | null;
+  masterVolume: Gain | null;
+};
+
+const App = memo(() => {
+  const [state, setState] = useState<State>({
+    pattern: null,
     masterVolume: null,
-    delayNode: null,
-    reverbGain: null,
   });
+  const [synth, setSynth] = useState<PolySynth | null>(null);
+  const [masterVolume, setMasterVolume] = useState<Gain | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [notes, setNotes] = useState<NotesState>({
-    default: Note.names(["C", "C#", "Dd", "D", "Eb", "E", "F", "F#", "Gb", "G", "Ab", "A", "Bb", "B"]),
-    scales: Scale.names(),
-    octaves: range(1, 8),
     root: "",
     scaleType: "",
     scaleName: "",
@@ -91,43 +94,46 @@ function App() {
   });
 
   useEffect(() => {
-    let { volume, delayAmount, delayTime, delayFeedback, reverbAmount, reverbFilterFreq, reverbFilterQ } = params;
+    const scaleType = pickRandomElement(SCALE_TYPES);
+    const root = pickRandomElement(NOTE_NAMES);
+    const octave = pickRandomElement(OCTAVES).toString();
+    const scaleName = `${root}${octave} ${scaleType}`;
+    const scale = Scale.get(scaleName).notes;
+    setNotes({ ...notes, root, octave, scaleType, scaleName, scale });
 
-    const masterVolume = getGain(ctx, volume);
-    masterVolume.connect(ctx.destination);
-
-    const delayNode = getDelay(ctx, { delayTime });
-    const feedbackNode = getGain(ctx, delayFeedback);
-    const delayGainNode = getGain(ctx, delayAmount);
-
-    delayGainNode.connect(delayNode);
-    delayNode.connect(feedbackNode).connect(delayNode);
-
-    const reverbDelayA = getDelay(ctx, { delayTime: 0.52 }); // 0.82
-    const reverbDelayB = getDelay(ctx, { delayTime: 0.33 }); // 0.73
-    const reverbGain = getGain(ctx, reverbAmount);
-    const reverbFilter = getFilter(ctx, { type: "bandpass", Q: reverbFilterQ, frequency: reverbFilterFreq });
-
-    reverbGain.connect(reverbDelayA).connect(reverbFilter);
-    reverbGain.connect(reverbDelayB).connect(reverbFilter);
-    reverbFilter.connect(reverbGain).connect(masterVolume);
-
-    setNodes({
-      masterVolume,
-      delayNode,
-      reverbGain,
-    });
-
+    let { volume } = params;
+    const masterVolume = new Gain(volume).toDestination();
+    const synth = new PolySynth().connect(masterVolume);
+    setMasterVolume(masterVolume);
+    setSynth(synth);
     console.log("init");
   }, []);
 
+  // Change master volume
   useEffect(() => {
-    const scaleType = pickRandomElement(notes.scales);
-    const root = pickRandomElement(notes.default);
-    const octave = pickRandomElement(notes.octaves).toString();
-    const scaleName = `${root}${octave} ${scaleType}`;
-    setNotes({ ...notes, root, octave, scaleType, scaleName, scale: Scale.get(scaleName).notes });
-  }, []);
+    if (masterVolume) {
+      masterVolume.set({ gain: params.volume });
+    } else {
+      console.error("master volume is null");
+    }
+  }, [masterVolume, params.volume]);
+
+  // Change Pattern
+  useEffect(() => {
+    const pattern = new Pattern(
+      (time, note) => {
+        console.log(time, note, synth);
+        synth?.triggerAttackRelease(note, playState.currentNoteLength, time);
+      },
+      notes.scale,
+      "random"
+    );
+    setState({ ...state, pattern });
+    console.log("init pattern");
+    return () => {
+      setState({ ...state, pattern: null });
+    };
+  }, [synth, playState.currentNoteLength, notes.scale]);
 
   useEffect(() => {
     const currentNoteLength = round(random(randoms.minNoteLength, randoms.maxNoteLength, true), 2);
@@ -165,84 +171,22 @@ function App() {
     setRandoms({ ...randoms, minNoteLength, maxNoteLength });
   }, [params.noteLength, params.randomiseNoteLength]);
 
-  useEffect(() => {
-    if (isPlaying) {
-      nodes.masterVolume?.connect(ctx.destination);
-      noteLoop();
-    } else {
-      nodes.masterVolume?.disconnect();
-    }
-  }, [isPlaying]);
-
   function setCurrentScale(note: string, octave: string, scaleType: string) {
     const scaleName = `${note}${octave} ${scaleType}`;
     const scale = Scale.get(scaleName).notes;
     setNotes({ ...notes, root: note, octave, scaleType, scaleName, scale });
   }
 
-  const playCurrentNote = () => {
-    console.log(playState.currentFreq, 187);
-    const { waveform, attack, sustain, release, modulationAmount, modulationRate, noteLength } = params;
-    const { minNoteLength, maxNoteLength } = randoms;
-    const { currentNote, currentFreq, currentNoteLength, currentDetune } = playState;
-
-    const osc = new Oscillator(ctx, {
-      type: waveform as OscillatorType,
-      detune: currentDetune,
-      attack,
-      release,
-      sustain,
-      noteLength,
-    });
-
-    const { masterVolume, delayNode, reverbGain } = nodes;
-    osc.connect(masterVolume);
-    osc.connect(delayNode);
-    osc.connect(reverbGain);
-
-    // const lfoGain = getGain(ctx, modulationAmount);
-    // lfoGain.connect(osc.frequency);
-
-    // const lfo = ctx.createOscillator();
-    // lfo.frequency.setValueAtTime(modulationRate, 0);
-    // lfo.start(0);
-    // lfo.stop(ctx.currentTime + noteLength);
-    // lfo.connect(lfoGain);
-
-    console.log("Note:", currentNote);
-    osc.play(currentFreq, ctx.currentTime);
-  };
-
   function togglePlay() {
     if (!isPlaying) {
       setIsPlaying(true);
+      Tone.Transport.start();
+      state.pattern?.start();
     } else {
       setIsPlaying(false);
+      state.pattern?.stop();
+      Tone.Transport.pause();
     }
-  }
-
-  function nextNote() {
-    const currentNoteIndex = random(0, notes.scale.length - 1);
-    setPlayState({ ...playState, currentNoteIndex });
-  }
-
-  function noteLoop() {
-    const { minSpacing, maxSpacing } = randoms;
-    console.log(`Next note: [ ${minSpacing} - ${maxSpacing} ]: ${playState.nextNoteTime}s`);
-    if (isPlaying) {
-      playCurrentNote();
-      nextNote();
-      setTimeout(() => {
-        noteLoop();
-      }, playState.nextNoteTime * 1000);
-    }
-  }
-
-  function calcMin(value: number, randomisation: number): number {
-    return round(value - randomisation * value, 2);
-  }
-  function calcMax(value: number, randomisation: number): number {
-    return round(value + randomisation * value, 2);
   }
 
   const onParamChange = (param: keyof typeof params) => (value: number) => {
@@ -277,7 +221,7 @@ function App() {
               value={notes.root}
               onChange={(e) => setCurrentScale(e.currentTarget.value, notes.octave, notes.scaleType)}
             >
-              {notes.default.map((note, i) => (
+              {NOTE_NAMES.map((note, i) => (
                 <option value={note} key={i}>
                   {note}
                 </option>
@@ -289,7 +233,7 @@ function App() {
               value={notes.octave}
               onChange={(e) => setCurrentScale(notes.root, e.currentTarget.value, notes.scaleType)}
             >
-              {notes.octaves.map((octave) => (
+              {OCTAVES.map((octave) => (
                 <option value={octave.toString()} key={octave}>
                   {octave}
                 </option>
@@ -301,7 +245,7 @@ function App() {
               value={notes.scaleType}
               onChange={(e) => setCurrentScale(notes.root, notes.octave, e.currentTarget.value)}
             >
-              {notes.scales.map((scale, i) => (
+              {SCALE_TYPES.map((scale, i) => (
                 <option value={scale} key={i}>
                   {scale}
                 </option>
@@ -522,6 +466,6 @@ function App() {
       </section>
     </div>
   );
-}
+});
 
 export default App;

@@ -1,3 +1,6 @@
+import { Note } from "@tonaljs/tonal";
+import { round } from "lodash";
+
 export type DelayOptions = {
   delayTime?: number;
 };
@@ -78,4 +81,8 @@ export function getOscillator(ctx: AudioContext, { type = "sine", frequency = 10
   });
 
   return oscillator;
+}
+
+export function getFreq(note: string) {
+  return round(Note.freq(note) as number, 2);
 }
