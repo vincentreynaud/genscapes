@@ -1,28 +1,32 @@
 import React, { useEffect, useContext, useState } from "react";
-import context from "../components/Context";
+import context from "../components/AudioCtxContext";
 
 // https://madewithlove.com/blog/software-engineering/creating-a-declarative-oscillator-component-with-react-hooks/
 
 export default ({ frequency = 130, type = "sine" } = {}) => {
   const [oscillator, setOscillator] = useState<OscillatorNode | null>(null);
 
-  const { ctx } = useContext(context);
+  const { getAudioContext, requestInit } = useContext(context);
 
   useEffect(() => {
-    const oscillator = ctx.createOscillator();
+    requestInit();
+    const ctx = getAudioContext();
+    if (ctx) {
+      const oscillator = ctx.createOscillator();
 
-    oscillator.frequency.value = frequency;
-    oscillator.type = type as OscillatorType;
+      oscillator.frequency.value = frequency;
+      oscillator.type = type as OscillatorType;
 
-    oscillator.start();
-    oscillator.connect(ctx.destination);
+      oscillator.start();
+      oscillator.connect(ctx.destination);
 
-    setOscillator(oscillator);
+      setOscillator(oscillator);
 
-    return () => {
-      oscillator.stop();
-      oscillator.disconnect();
-    };
+      return () => {
+        oscillator.stop();
+        oscillator.disconnect();
+      };
+    }
   }, []);
 
   useEffect(() => {
