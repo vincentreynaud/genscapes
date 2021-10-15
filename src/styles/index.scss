@@ -1,52 +1,52 @@
 // @import "~bootstrap/scss/bootstrap.scss";
 
 body {
-  background: rgb(39, 39, 39) !important;
-  color: rgb(215, 215, 215) !important;
-  font-family: "Courier New", Courier, monospace !important;
+	background: rgb(39, 39, 39) !important;
+	color: rgb(215, 215, 215) !important;
+	font-family: 'Courier New', Courier, monospace !important;
 }
 
 section {
-  margin: 0.5rem 0;
+	margin: 0.5rem 0;
 }
 
 .content {
-  margin: 0.5rem;
-  height: 100vw;
-  position: relative;
+	margin: 0.5rem;
+	height: 100vw;
+	position: relative;
 }
 
 .box {
-  border: 1px solid rgb(149, 149, 149);
-  border-radius: 8px;
-  padding: 0.75rem;
-  margin: 0.5rem;
+	border: 1px solid rgb(149, 149, 149);
+	border-radius: 8px;
+	padding: 0.75rem;
+	margin: 0.5rem;
 }
 
 span.control-value {
-  padding-left: 0.5rem;
-  width: 6.5rem;
-  display: inline-block;
+	padding-left: 0.5rem;
+	width: 6.5rem;
+	display: inline-block;
 }
 
 #main-controls {
-  position: fixed;
-  bottom: 0;
-  height: 5rem;
-  width: 100%;
+	position: fixed;
+	bottom: 0;
+	height: 5rem;
+	width: 100%;
 }
 
 #play-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-transform: capitalize !important;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-transform: capitalize !important;
 }
 
 #volume {
-  position: absolute;
-  top: 50%;
-  right: 4rem;
-  transform: translateY(-50%);
+	position: absolute;
+	top: 50%;
+	right: 4rem;
+	transform: translateY(-50%);
 }
