@@ -1,6 +1,6 @@
 import RangeInput from "./RangeInput";
 import "../styles/index.scss";
-import { memo, useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { getDelay, getFilter, getGain, getOscillator } from "../lib/audio-helpers";
 import { random, range, round } from "lodash";
 import { Note, Scale } from "@tonaljs/tonal";
@@ -10,7 +10,7 @@ import context from "./AudioCtxContext";
 import * as Tone from "tone";
 import { Gain, Pattern, PolySynth, Synth } from "tone";
 import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from "../lib/constants";
-import { calcMax, calcMin } from "../helpers";
+import { calcMax, calcMin, calcRandom } from "../helpers";
 
 type NotesState = {
   root: string;
@@ -21,9 +21,6 @@ type NotesState = {
 };
 
 type AppState = {
-  currentNoteIndex: number;
-  currentNote: string;
-  currentFreq: number;
   currentNoteLength: number;
   currentDetune: number;
   nextNoteTime: number;
@@ -74,22 +71,11 @@ const App = memo(() => {
     reverbFilterQ: 0.3,
   });
 
-  const [randoms, setRandoms] = useState({
-    minSpacing: calcMin(params.spacing, params.randomiseSpacing),
-    maxSpacing: calcMax(params.spacing, params.randomiseSpacing),
-    minDetune: calcMin(params.detune, params.randomiseDetune),
-    maxDetune: calcMax(params.detune, params.randomiseDetune),
-    minNoteLength: calcMin(params.noteLength, params.randomiseNoteLength),
-    maxNoteLength: calcMax(params.noteLength, params.randomiseNoteLength),
-  });
-
+  // Thses should actually be calculated on the spot
   const [playState, setPlayState] = useState<AppState>({
-    currentNoteIndex: 0,
-    currentNote: "",
-    currentFreq: 333,
-    currentNoteLength: round(random(randoms.minNoteLength, randoms.maxNoteLength, true), 2),
-    currentDetune: round(random(randoms.minDetune, randoms.maxDetune, true)),
-    nextNoteTime: round(random(randoms.minSpacing, randoms.maxSpacing, true), 2),
+    currentNoteLength: calcRandom(params.noteLength, params.randomiseNoteLength),
+    currentDetune: calcRandom(params.detune, params.randomiseDetune),
+    nextNoteTime: calcRandom(params.spacing, params.randomiseSpacing),
     delayIsOn: false,
   });
 
@@ -108,6 +94,11 @@ const App = memo(() => {
     setSynth(synth);
     console.log("init");
   }, []);
+
+  const latestPlayState = useRef(playState);
+  useEffect(() => {
+    latestPlayState.current = playState;
+  }, [playState]);
 
   // Change master volume
   useEffect(() => {
@@ -135,41 +126,26 @@ const App = memo(() => {
     };
   }, [synth, playState.currentNoteLength, notes.scale]);
 
+  // Update current note length
   useEffect(() => {
-    const currentNoteLength = round(random(randoms.minNoteLength, randoms.maxNoteLength, true), 2);
-    const currentDetune = round(random(randoms.minDetune, randoms.maxDetune, true));
-    const currentNote = notes.scale[playState.currentNoteIndex];
-    const currentFreq = round(Note.freq(currentNote) as number, 2);
-    const nextNoteTime = round(random(randoms.minSpacing, randoms.maxSpacing, true), 2);
-    setPlayState({ ...playState, currentNote, currentFreq, currentNoteLength, currentDetune, nextNoteTime });
-  }, [
-    notes.scale,
-    playState.currentNoteIndex,
-    randoms.minNoteLength,
-    randoms.maxNoteLength,
-    randoms.minDetune,
-    randoms.maxDetune,
-    randoms.minSpacing,
-    randoms.maxSpacing,
-  ]);
+    const { noteLength, randomiseNoteLength } = params;
+    const currentNoteLength = calcRandom(noteLength, randomiseNoteLength);
+    setPlayState({ ...latestPlayState.current, currentNoteLength }); // ERR: state will be overwritten by previous
+  }, [params.noteLength, params.randomiseNoteLength]);
 
+  // Update current detune
   useEffect(() => {
-    const minSpacing = calcMin(params.spacing, params.randomiseSpacing);
-    const maxSpacing = calcMax(params.spacing, params.randomiseSpacing);
-    setRandoms({ ...randoms, minSpacing, maxSpacing });
-  }, [params.spacing, params.randomiseSpacing]);
-
-  useEffect(() => {
-    const minDetune = calcMin(params.detune, params.randomiseDetune);
-    const maxDetune = calcMax(params.detune, params.randomiseDetune);
-    setRandoms({ ...randoms, minDetune, maxDetune });
+    const { detune, randomiseDetune } = params;
+    const currentDetune = calcRandom(detune, randomiseDetune);
+    setPlayState({ ...playState, currentDetune }); // ERR: state will be overwritten by previous
   }, [params.detune, params.randomiseDetune]);
 
+  // Update next note time
   useEffect(() => {
-    const minNoteLength = calcMin(params.noteLength, params.randomiseNoteLength);
-    const maxNoteLength = calcMax(params.noteLength, params.randomiseNoteLength);
-    setRandoms({ ...randoms, minNoteLength, maxNoteLength });
-  }, [params.noteLength, params.randomiseNoteLength]);
+    const { spacing, randomiseSpacing } = params;
+    const nextNoteTime = calcRandom(spacing, randomiseSpacing);
+    setPlayState({ ...playState, nextNoteTime }); // ERR: state will be overwritten by previous
+  }, [params.spacing, params.randomiseSpacing]);
 
   function setCurrentScale(note: string, octave: string, scaleType: string) {
     const scaleName = `${note}${octave} ${scaleType}`;
