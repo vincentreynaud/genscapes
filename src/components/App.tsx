@@ -13,25 +13,6 @@ import { calcRandom } from '../helpers';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import '../styles/index.scss';
 
-type NotesState = {
-	root: string;
-	scaleType: string;
-	scaleName: string;
-	scale: string[];
-	octave: string;
-};
-
-type AppState = {
-	currentNoteLength: number;
-	currentDetune: number;
-	nextNoteTime: number;
-};
-
-type State = {
-	pattern: Pattern<any> | null;
-	masterVolume: Gain | null;
-};
-
 const App = memo(() => {
 	const trackId = 0;
 
@@ -57,18 +38,6 @@ const App = memo(() => {
 	// 	nextNoteTime: calcRandom(composition.interval, composition.randomiseInterval),
 	// });
 
-	const handleParamChange = (module, param, value) => {
-		dispatch(updateParam(module, param, value));
-	};
-
-	const handleCompositionChange = (key, value) => {
-		dispatch(setTrackCompositionComponent(trackId, key, value));
-	};
-
-	const handleGlobalParamChange = (value: number) => {
-		dispatch(setGlobalParam('volume', value));
-	};
-
 	useEffect(() => {
 		const masterVolumeNode = new Gain(volume).toDestination();
 		const synthNode = new PolySynth().connect(masterVolumeNode);
@@ -76,6 +45,28 @@ const App = memo(() => {
 		dispatch(setTrackAudioComponent(trackId, 'synthNode', synthNode));
 		console.log('init');
 	}, []);
+
+	const handleParamChange = (module, param, value) => {
+		dispatch(updateParam(module, param, value));
+	};
+
+	const handleCompositionChange = (key, value: Pattern<string> | null) => {
+		if (playing) {
+			stopComposition();
+		}
+		dispatch(setTrackCompositionComponent(trackId, key, value));
+	};
+
+	const handleGlobalParamChange = (value: number) => {
+		dispatch(setGlobalParam('volume', value));
+	};
+
+	// Continue playing pattern on change
+	useEffect(() => {
+		if (playing) {
+			startComposition();
+		}
+	}, [composition?.pattern]);
 
 	// Change master volume
 	useEffect(() => {
@@ -134,23 +125,31 @@ const App = memo(() => {
 		handleParamChange('notes', 'scale', scale);
 	}
 
+	function startComposition() {
+		Tone.Transport.start();
+		if (composition && composition.pattern) {
+			composition.pattern.start();
+		} else {
+			console.log(composition, composition?.pattern);
+		}
+	}
+
+	function stopComposition() {
+		if (composition && composition.pattern) {
+			composition.pattern.stop();
+		} else {
+			console.log(composition, composition?.pattern);
+		}
+		Tone.Transport.pause();
+	}
+
 	function togglePlay() {
 		if (!playing) {
 			dispatch(setPlay(true));
-			Tone.Transport.start();
-			if (composition && composition.pattern) {
-				composition.pattern.start();
-			} else {
-				console.log(composition, composition?.pattern);
-			}
+			startComposition();
 		} else {
 			dispatch(setPlay(false));
-			if (composition && composition.pattern) {
-				composition.pattern.stop();
-			} else {
-				console.log(composition, composition?.pattern);
-			}
-			Tone.Transport.pause();
+			stopComposition();
 		}
 	}
 
