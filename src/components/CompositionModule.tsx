@@ -14,7 +14,6 @@ const CompositionModule = ({ params, onParamChange }: State) => {
 
 	return (
 		<ModuleWrapper id="composition-module" title="Composition">
-			<h4>Composition</h4>
 			<div className="container-fluid px-0">
 				<div className="row no-gutters">
 					<div className="col-6">

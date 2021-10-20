@@ -1,26 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Gain } from 'tone';
+import { KeyValuePair } from '../types/shared';
 
-type AudioState = {
+type GlobalState = {
 	playing: boolean;
 	volume: number;
-	components: {
-		masterVolume: Gain | null;
-	};
-};
-
-type SetGlobalComponentActionPayload = {
-	name: string;
-	value: any;
 };
 
 const initialState = {
 	playing: false,
 	volume: 0.5,
-	components: {
-		masterVolume: null,
-	},
-} as AudioState;
+} as GlobalState;
 
 const globalSlice = createSlice({
 	name: 'global',
@@ -29,20 +18,20 @@ const globalSlice = createSlice({
 		setPlay(state, action: PayloadAction<boolean>) {
 			state.playing = action.payload;
 		},
-		setGlobalComponent: {
-			reducer(state, action: PayloadAction<SetGlobalComponentActionPayload>) {
-				const { name, value } = action.payload;
-				state.components[name] = value;
+		setGlobalParam: {
+			reducer(state, action: PayloadAction<KeyValuePair>) {
+				const { key, value } = action.payload;
+				state[key] = value;
 			},
-			prepare(name, value) {
+			prepare(key, value) {
 				return {
-					payload: { name, value },
+					payload: { key, value },
 				};
 			},
 		},
 	},
 });
 
-export const { setPlay, setGlobalComponent } = globalSlice.actions;
+export const { setPlay, setGlobalParam } = globalSlice.actions;
 
 export default globalSlice.reducer;

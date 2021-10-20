@@ -1,24 +1,17 @@
-import RangeInput from './RangeInput';
-import '../styles/index.scss';
-import { memo, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { getDelay, getFilter, getGain, getOscillator } from '../lib/audio-helpers';
-import { random, range, round } from 'lodash';
-import { Note, Scale } from '@tonaljs/tonal';
-import { pickRandomElement } from '../utils';
-import Oscillator from '../lib/Oscillator';
-import context from './AudioCtxContext';
+import { memo, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import { Gain, Pattern, PolySynth, Synth } from 'tone';
-import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from '../lib/constants';
-import { calcMax, calcMin, calcRandom } from '../helpers';
-import { useDispatch } from 'react-redux';
-import { setAudioComponent, updateParam } from '../reducers/tracks';
-import { Instrument } from 'tone/build/esm/instrument/Instrument';
+import { Gain, Pattern, PolySynth } from 'tone';
+import { Scale } from '@tonaljs/tonal';
+import RangeInput from './RangeInput';
+import NotesModule from './NotesModule';
 import InstrumentModule from './InstrumentModule';
 import CompositionModule from './CompositionModule';
+import { updateParam } from '../reducers/tracks';
+import { setGlobalParam, setPlay } from '../reducers/global';
+import { setGlobalAudioComponent, setTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
+import { calcRandom } from '../helpers';
 import { useAppSelector, useAppDispatch } from '../hooks';
-import NotesModule from './NotesModule';
-import { setGlobalComponent, setPlay } from '../reducers/global';
+import '../styles/index.scss';
 
 type NotesState = {
 	root: string;
@@ -43,17 +36,20 @@ const App = memo(() => {
 	const trackId = 0;
 
 	const dispatch = useAppDispatch();
-	const trackState = useAppSelector((state) => state.tracks[trackId]);
-	const globalState = useAppSelector((state) => state.global);
-	const { instrument, notes, composition, effects, audio: trackAudio } = trackState;
-	const synth = trackAudio.components.synth;
-	const { playing, volume, components: globalComponents } = globalState;
-	const masterVolume = globalComponents.masterVolume;
+	const trackParams = useAppSelector((state) => state.tracks[trackId]);
+	const trackAudio = useAppSelector((state) => state.audio.tracks[trackId]);
+	const globalParams = useAppSelector((state) => state.global);
+	const globalAudio = useAppSelector((state) => state.audio.global);
+	const { instrument, notes, composition: compositionParams, effects } = trackParams;
+	const { playing, volume } = globalParams;
 
-	const latestTrackState = useRef(trackState);
+	const latestTrackParams = useRef(trackParams);
 	useEffect(() => {
-		latestTrackState.current = trackState;
-	}, [trackState]);
+		latestTrackParams.current = trackParams;
+	}, [trackParams]);
+
+	const { masterVolumeNode } = globalAudio;
+	const { synthNode, composition } = trackAudio;
 
 	// const toCalcOnTheSpot = {
 	// 	currentNoteLength: calcRandom(composition.noteLength, composition.randomiseNoteLength),
@@ -65,57 +61,54 @@ const App = memo(() => {
 		dispatch(updateParam(module, param, value));
 	};
 
-	useEffect(() => {
-		const scaleType = pickRandomElement(SCALE_TYPES);
-		const root = pickRandomElement(NOTE_NAMES);
-		const octave = pickRandomElement(OCTAVES).toString();
-		const scaleName = `${root}${octave} ${scaleType}`;
-		const scale = Scale.get(scaleName).notes;
-		handleParamChange('notes', 'root', root);
-		handleParamChange('notes', 'octave', octave);
-		handleParamChange('notes', 'scaleType', scaleType);
-		handleParamChange('notes', 'scaleName', scaleName);
-		handleParamChange('notes', 'scale', scale);
+	const handleCompositionChange = (key, value) => {
+		dispatch(setTrackCompositionComponent(trackId, key, value));
+	};
 
-		const masterVolume = new Gain(volume).toDestination();
-		const synth = new PolySynth().connect(masterVolume);
-		dispatch(setGlobalComponent('masterVolume', masterVolume));
-		dispatch(setAudioComponent('synth', synth));
+	const handleGlobalParamChange = (value: number) => {
+		dispatch(setGlobalParam('volume', value));
+	};
+
+	useEffect(() => {
+		const masterVolumeNode = new Gain(volume).toDestination();
+		const synthNode = new PolySynth().connect(masterVolumeNode);
+		dispatch(setGlobalAudioComponent('masterVolumeNode', masterVolumeNode));
+		dispatch(setTrackAudioComponent(trackId, 'synthNode', synthNode));
 		console.log('init');
 	}, []);
 
 	// Change master volume
 	useEffect(() => {
-		if (masterVolume) {
-			masterVolume.set({ gain: volume });
+		if (masterVolumeNode) {
+			masterVolumeNode.set({ gain: volume });
 		} else {
 			console.error('master volume is null');
 		}
-	}, [masterVolume, volume]);
+	}, [masterVolumeNode, volume]);
 
 	// Change Pattern
 	useEffect(() => {
 		const pattern = new Pattern(
 			(time, note) => {
-				console.log(time, note, synth);
-				synth?.triggerAttackRelease(note, composition.noteLength, time); // try with currentNoteLength calc on the spot
+				console.log(time, note, synthNode);
+				synthNode?.triggerAttackRelease(note, compositionParams.noteLength, time); // try with currentNoteLength calc on the spot
 			},
 			notes.scale,
 			'random'
 		);
-		handleParamChange('composition', 'pattern', pattern);
+		handleCompositionChange('pattern', pattern);
 		console.log('init pattern');
 		return () => {
-			handleParamChange('composition', 'pattern', null);
+			handleCompositionChange('pattern', null);
 		};
-	}, [synth, composition.noteLength, notes.scale]);
+	}, [synthNode, compositionParams.noteLength, notes.scale]);
 
 	// Update current note length
 	useEffect(() => {
-		const { noteLength, randomiseNoteLength } = composition;
+		const { noteLength, randomiseNoteLength } = compositionParams;
 		const currentNoteLength = calcRandom(noteLength, randomiseNoteLength);
 		// setPlayState({ ...latestPlayState.current, currentNoteLength });
-	}, [composition.noteLength, composition.randomiseNoteLength]);
+	}, [compositionParams.noteLength, compositionParams.randomiseNoteLength]);
 
 	// Update current detune
 	useEffect(() => {
@@ -126,10 +119,10 @@ const App = memo(() => {
 
 	// Update next note time
 	useEffect(() => {
-		const { interval, randomiseInterval } = composition;
+		const { interval, randomiseInterval } = compositionParams;
 		const nextNoteTime = calcRandom(interval, randomiseInterval);
 		// setPlayState({ ...playState, nextNoteTime }); // ERR: state will be overwritten by previous
-	}, [composition.interval, composition.randomiseInterval]);
+	}, [compositionParams.interval, compositionParams.randomiseInterval]);
 
 	function setCurrentScale(note: string, octave: string, scaleType: string) {
 		const scaleName = `${note}${octave} ${scaleType}`;
@@ -145,10 +138,18 @@ const App = memo(() => {
 		if (!playing) {
 			dispatch(setPlay(true));
 			Tone.Transport.start();
-			composition.pattern?.start();
+			if (composition && composition.pattern) {
+				composition.pattern.start();
+			} else {
+				console.log(composition, composition?.pattern);
+			}
 		} else {
 			dispatch(setPlay(false));
-			composition.pattern?.stop();
+			if (composition && composition.pattern) {
+				composition.pattern.stop();
+			} else {
+				console.log(composition, composition?.pattern);
+			}
 			Tone.Transport.pause();
 		}
 	}
@@ -159,17 +160,17 @@ const App = memo(() => {
 				<button id="play-button" className="btn btn-dark" onClick={togglePlay}>
 					{playing ? 'Stop' : 'Start'}
 				</button>
-				{/* <div id="volume">
+				<div id="volume">
 					<RangeInput
 						label=""
 						min={0}
 						max={1}
 						step={0.1}
 						unit=""
-						initValue={params.volume}
-						onChange={onParamChange('volume')}
+						initValue={volume}
+						onChange={handleGlobalParamChange}
 					/>
-				</div> */}
+				</div>
 			</div>
 			<section className="container-fluid">
 				<div className="row">
@@ -179,7 +180,7 @@ const App = memo(() => {
 			<section className="container-fluid">
 				<div className="row">
 					<NotesModule onParamChange={handleParamChange} notes={notes} setCurrentScale={setCurrentScale} />
-					<CompositionModule onParamChange={handleParamChange} params={composition} />
+					<CompositionModule onParamChange={handleParamChange} params={compositionParams} />
 				</div>
 			</section>
 		</div>

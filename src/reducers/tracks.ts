@@ -9,11 +9,6 @@ type UpdateParamActionPayload = {
 	value: number;
 };
 
-type SetAudioComponentActionPayload = {
-	name: string;
-	value: any;
-};
-
 const tracksSlice = createSlice({
 	name: 'tracks',
 	initialState,
@@ -38,23 +33,12 @@ const tracksSlice = createSlice({
 				};
 			},
 		},
-		setAudioComponent: {
-			reducer(state, action: PayloadAction<SetAudioComponentActionPayload>) {
-				const { name, value } = action.payload;
-				state[0].audio.components[name] = value;
-			},
-			prepare(name, value) {
-				return {
-					payload: { name, value },
-				};
-			},
-		},
 		// todoDeleted(state, action) {
 		//   delete state.entities[action.payload]
 		// }
 	},
 });
 
-export const { updateParam, setAudioComponent } = tracksSlice.actions;
+export const { updateParam } = tracksSlice.actions;
 
 export default tracksSlice.reducer;

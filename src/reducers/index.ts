@@ -1,7 +1,9 @@
-import tracks from './tracks';
 import global from './global';
+import tracks from './tracks';
+import audio from './audio';
 
 export default {
-	tracks,
 	global,
+	tracks,
+	audio,
 };
