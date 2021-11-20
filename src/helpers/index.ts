@@ -1,4 +1,5 @@
-import { random, round } from "lodash";
+import { random, round } from 'lodash';
+import { TrackState } from '../initialState';
 
 export function calcMin(value: number, randomisation: number): number {
   return round(value - randomisation * value, 2);
@@ -15,4 +16,14 @@ export function calcRandom(value: number, randAmount: number) {
   const min = calcMin(value, randAmount);
   const max = calcMax(value, randAmount);
   return getAndFormatRandom(min, max);
+}
+
+export function getCurrentNoteLength(composition: TrackState['composition']) {
+  const { noteLength, randomiseNoteLength } = composition;
+  return calcRandom(noteLength, randomiseNoteLength);
+}
+
+export function getCurrentInterval(composition: TrackState['composition']) {
+  const { interval, randomiseInterval } = composition;
+  return calcRandom(interval, randomiseInterval);
 }
