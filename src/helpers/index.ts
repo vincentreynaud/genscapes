@@ -1,5 +1,5 @@
 import { random, round } from 'lodash';
-import { TrackState } from '../initialState';
+import { TrackState } from '../types/tracks';
 
 export function calcMin(value: number, randomisation: number): number {
   return round(value - randomisation * value, 2);
@@ -26,4 +26,9 @@ export function getCurrentNoteLength(composition: TrackState['composition']) {
 export function getCurrentInterval(composition: TrackState['composition']) {
   const { interval, randomiseInterval } = composition;
   return calcRandom(interval, randomiseInterval);
+}
+
+export function getCurrentDetune(notes: TrackState['notes']) {
+  const { detune, randomiseDetune } = notes;
+  return calcRandom(detune, randomiseDetune);
 }

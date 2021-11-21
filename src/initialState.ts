@@ -1,35 +1,7 @@
 import { Scale } from '@tonaljs/tonal';
-import { Pattern, PolySynth } from 'tone';
 import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from './lib/constants';
+import { TrackState } from './types/tracks';
 import { pickRandomElement } from './utils';
-
-export type TrackState = {
-  instrument: {
-    name: string;
-    waveform: string;
-    attack: number;
-    sustain: number;
-    release: number;
-    modulationAmount: number;
-    modulationRate: number;
-  };
-  notes: {
-    root: string;
-    scaleType: string;
-    scaleName: string;
-    scale: string[];
-    octave: string;
-    randomiseDetune: number;
-    detune: number;
-  };
-  effects: any[];
-  composition: {
-    noteLength: number;
-    randomiseNoteLength: number;
-    interval: number;
-    randomiseInterval: number;
-  };
-};
 
 const root = pickRandomElement(NOTE_NAMES);
 const octave = pickRandomElement(OCTAVES).toString();
@@ -41,9 +13,12 @@ export const initialTrackState: TrackState = {
   instrument: {
     name: 'oscillator',
     waveform: 'sine',
-    attack: 0.3,
-    sustain: 0.8,
-    release: 0.3,
+    envelope: {
+      attack: 5.5,
+      decay: 4,
+      sustain: 0.8,
+      release: 8,
+    },
     modulationAmount: 0.2,
     modulationRate: 25,
   },
@@ -58,10 +33,10 @@ export const initialTrackState: TrackState = {
   },
   effects: [],
   composition: {
-    noteLength: 3,
-    randomiseNoteLength: 0,
-    interval: 2,
-    randomiseInterval: 0,
+    noteLength: 10,
+    randomiseNoteLength: 0.8,
+    interval: 8,
+    randomiseInterval: 0.8,
   },
 };
 
