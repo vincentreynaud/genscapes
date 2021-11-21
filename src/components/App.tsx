@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import { Gain, Pattern, PolySynth, Synth } from 'tone';
+import { AMSynth, DuoSynth, Gain, LFO, MonoSynth, Oscillator, Pattern, PolySynth, Synth, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import RangeInput from './RangeInput';
 import NotesModule from './NotesModule';
@@ -8,16 +8,8 @@ import InstrumentModule from './InstrumentModule';
 import CompositionModule from './CompositionModule';
 import { updateParam } from '../reducers/tracks';
 import { setGlobalParam, setPlay } from '../reducers/global';
-import {
-  setGlobalAudioComponent,
-  setTrackAudioComponent,
-  setTrackCompositionComponent,
-} from '../reducers/audio';
-import {
-  getCurrentDetune,
-  getCurrentInterval,
-  getCurrentNoteLength,
-} from '../helpers';
+import { setGlobalAudioComponent, setTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
+import { clearDoubleHashes, getCurrentDetune, getCurrentInterval, getCurrentNoteLength } from '../helpers';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import '../styles/index.scss';
 
@@ -29,12 +21,7 @@ const App = memo(() => {
   const trackAudio = useAppSelector((state) => state.audio.tracks[trackId]);
   const globalParams = useAppSelector((state) => state.global);
   const globalAudio = useAppSelector((state) => state.audio.global);
-  const {
-    instrument,
-    notes,
-    composition: compositionParams,
-    effects,
-  } = trackParams;
+  const { instrument, notes, composition: compositionParams, effects } = trackParams;
   const { playing, volume } = globalParams;
 
   // find why to do this...?
@@ -43,57 +30,83 @@ const App = memo(() => {
     latestTrackParams.current = trackParams;
   }, [trackParams]);
 
-  const { masterVolumeNode } = globalAudio;
-  const { synthNode, composition } = trackAudio;
+  const { outputNode } = globalAudio;
+  const { synthNode, synthLfoNode, composition } = trackAudio;
   const {
     waveform,
     envelope: { attack, decay, release, sustain },
+    modulationRate,
+    modulationAmount,
   } = instrument;
 
   // init component
   useEffect(() => {
-    const masterVolumeNode = new Gain(volume).toDestination();
+    const outputNode = new Gain(volume).toDestination();
+    const synthLfoNode = new Tremolo(modulationRate, modulationAmount).connect(outputNode).start();
     const synthNode = new PolySynth({
       voice: Synth,
-      maxPolyphony: 4,
+      maxPolyphony: 8,
       options: {
+        volume: -12,
         oscillator: { type: waveform },
+        detune: getCurrentDetune(notes),
         envelope: { attack, decay, sustain, release },
       },
-    }).connect(masterVolumeNode);
-    dispatch(setGlobalAudioComponent('masterVolumeNode', masterVolumeNode));
+    }).connect(synthLfoNode);
+
+    dispatch(setGlobalAudioComponent('outputNode', outputNode));
     dispatch(setTrackAudioComponent(trackId, 'synthNode', synthNode));
+    dispatch(setTrackAudioComponent(trackId, 'synthLfoNode', synthLfoNode));
     console.log('init');
+
+    // window.addEventListener('keydown', (e: KeyboardEvent) => {
+    //   if (e.key === ' ') {
+    //     togglePlay();
+    //   }
+    // });
+
+    return () => {
+      // synthNode.dispose();
+      // outputNode.dispose();
+    };
   }, []);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (!playing) {
       dispatch(setPlay(true));
-      startComposition();
     } else {
       dispatch(setPlay(false));
-      stopComposition();
-      // synthNode?.releaseAll();
     }
-  };
+  }, [playing, dispatch]);
 
-  const startComposition = () => {
+  const startComposition = useCallback(() => {
     Tone.Transport.start();
     if (composition?.pattern) {
       composition.pattern.start();
     } else {
       console.log('pattern not set!');
     }
-  };
+  }, [composition?.pattern]);
 
-  const stopComposition = () => {
+  const stopComposition = useCallback(() => {
     if (composition?.pattern) {
       composition.pattern.stop();
     } else {
       console.log('pattern not set!');
     }
     Tone.Transport.pause();
-  };
+  }, [composition?.pattern]);
+
+  // toggle composition playback
+  useEffect(() => {
+    if (playing) {
+      startComposition();
+    } else {
+      stopComposition();
+      // @ts-ignore
+      synthNode?.releaseAll();
+    }
+  }, [playing, startComposition, stopComposition, synthNode]);
 
   const handleParamChange = (module, param, value, paramGroup = '') => {
     dispatch(updateParam(module, param, value, paramGroup));
@@ -103,7 +116,7 @@ const App = memo(() => {
     dispatch(setGlobalParam('volume', value));
   };
 
-  const handleCompositionChange = (key, value: Pattern<string> | null) => {
+  const handleCompositionChange = (key: 'pattern', value: Pattern<string> | null) => {
     if (playing) {
       stopComposition();
       value?.dispose(); // is that right?
@@ -113,27 +126,26 @@ const App = memo(() => {
 
   // Change master volume
   useEffect(() => {
-    if (masterVolumeNode) {
-      masterVolumeNode.set({ gain: volume });
+    if (outputNode) {
+      outputNode.set({ gain: volume });
     } else {
       console.error('master volume is null');
     }
-  }, [masterVolumeNode, volume]);
+  }, [outputNode, volume]);
 
   const triggerPatternNote = useCallback(
     (time, note) => {
       const noteLength = getCurrentNoteLength(compositionParams);
       const interval = getCurrentInterval(compositionParams);
       const detune = getCurrentDetune(notes);
-      console.log(note, 'interval', interval, 'noteLength', noteLength);
-      console.log('detune', detune);
+      console.log(note, detune, 'interval', interval, 'noteLength', noteLength);
       synthNode?.set({ detune });
       synthNode?.triggerAttackRelease(note, noteLength, time + interval);
     },
     [synthNode, compositionParams, notes]
   );
 
-  // Update Pattern
+  // Update pattern
   useEffect(() => {
     console.log('init pattern');
     const pattern = new Pattern({
@@ -148,7 +160,14 @@ const App = memo(() => {
     };
   }, [compositionParams, notes.scale, triggerPatternNote]);
 
-  // update synthNode on instrument params change
+  // Continue playing pattern on change
+  useEffect(() => {
+    if (playing) {
+      startComposition();
+    }
+  }, [composition?.pattern]);
+
+  // Update synthNode on instrument params change
   useEffect(() => {
     if (synthNode) {
       synthNode.set({
@@ -158,17 +177,21 @@ const App = memo(() => {
     }
   }, [synthNode, attack, decay, sustain, release, waveform]);
 
-  // Continue playing pattern on change
+  // Update synthLfoNode on params change
   useEffect(() => {
-    if (playing) {
-      startComposition();
+    if (synthLfoNode) {
+      synthLfoNode.set({
+        wet: modulationAmount,
+        frequency: modulationRate,
+      });
+      console.log(synthLfoNode.get());
     }
-  }, [composition?.pattern]);
+  }, [synthLfoNode, modulationRate, modulationAmount]);
 
   function setCurrentScale(note: string, octave: string, scaleType: string) {
     console.log(note);
     const scaleName = `${note}${octave} ${scaleType}`;
-    const scale = Scale.get(scaleName).notes;
+    const scale = clearDoubleHashes(Scale.get(scaleName).notes);
     handleParamChange('notes', 'root', note);
     handleParamChange('notes', 'octave', octave);
     handleParamChange('notes', 'scaleType', scaleType);
@@ -199,23 +222,13 @@ const App = memo(() => {
       </div>
       <section className='container-fluid'>
         <div className='row'>
-          <InstrumentModule
-            onParamChange={handleParamChange}
-            params={instrument}
-          />
+          <InstrumentModule onParamChange={handleParamChange} params={instrument} />
         </div>
       </section>
       <section className='container-fluid'>
         <div className='row'>
-          <NotesModule
-            onParamChange={handleParamChange}
-            notes={notes}
-            setCurrentScale={setCurrentScale}
-          />
-          <CompositionModule
-            onParamChange={handleParamChange}
-            params={compositionParams}
-          />
+          <NotesModule onParamChange={handleParamChange} notes={notes} setCurrentScale={setCurrentScale} />
+          <CompositionModule onParamChange={handleParamChange} params={compositionParams} />
         </div>
       </section>
     </div>

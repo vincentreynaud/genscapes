@@ -32,3 +32,7 @@ export function getCurrentDetune(notes: TrackState['notes']) {
   const { detune, randomiseDetune } = notes;
   return calcRandom(detune, randomiseDetune);
 }
+
+export function clearDoubleHashes(scale: string[]) {
+  return scale.map((note) => note.replace(/##/g, '#'));
+}

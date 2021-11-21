@@ -19,8 +19,8 @@ export const initialTrackState: TrackState = {
       sustain: 0.8,
       release: 8,
     },
-    modulationAmount: 0.2,
-    modulationRate: 25,
+    modulationAmount: 1,
+    modulationRate: 30,
   },
   notes: {
     root,
