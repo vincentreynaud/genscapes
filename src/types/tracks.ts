@@ -1,4 +1,4 @@
-import { ToneOscillatorType } from 'tone';
+import { AutoFilterOptions, ToneOscillatorType } from 'tone';
 import { NonCustomOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
 
 export type TrackState = {
@@ -23,7 +23,7 @@ export type TrackState = {
     randomiseDetune: number;
     detune: number;
   };
-  effects: any[];
+  effects: TrackEffect[];
   composition: {
     noteLength: number;
     randomiseNoteLength: number;
@@ -31,3 +31,15 @@ export type TrackState = {
     randomiseInterval: number;
   };
 };
+
+export type TrackEffect = AutoFilterEffect;
+export type EffectId = 'auto-filter' | 'reverb' | 'delay';
+export type EffectParams = AutoFilterOptions;
+
+export interface TrackEffectBase {
+  id: EffectId;
+}
+
+export interface AutoFilterEffect extends TrackEffectBase {
+  options: Partial<AutoFilterOptions>;
+}

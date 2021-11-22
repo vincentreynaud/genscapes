@@ -1,13 +1,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { find } from 'lodash';
+import { AutoFilterOptions } from 'tone';
 import { initialTrackState } from '../initialState';
+import { EffectId } from '../types/tracks';
 
 const initialState = [initialTrackState];
 
 type UpdateParamActionPayload = {
+  trackId: number;
   module: string;
   paramGroup?: string;
   param: string;
   value: number;
+};
+
+type AddEffectActionPayload = {
+  trackId: number;
+  effect: any;
+};
+
+type UpdateEffectParamActionPayload = {
+  trackId: number;
+  effectId: EffectId;
+  options: AutoFilterOptions;
 };
 
 const tracksSlice = createSlice({
@@ -25,17 +40,40 @@ const tracksSlice = createSlice({
     // },
     updateParam: {
       reducer(state, action: PayloadAction<UpdateParamActionPayload>) {
-        const { module, paramGroup, param, value } = action.payload;
+        const { trackId, module, paramGroup, param, value } = action.payload;
         if (paramGroup) {
-          state[0][module][paramGroup][param] = value;
+          state[trackId][module][paramGroup][param] = value;
         } else {
-          state[0][module][param] = value;
+          state[trackId][module][param] = value;
         }
       },
-      prepare(module, param, value, paramGroup = '') {
+      prepare(trackId, module, param, value, paramGroup = '') {
         return {
-          payload: { module, param, value, paramGroup },
+          payload: { trackId, module, param, value, paramGroup },
         };
+      },
+    },
+    addEffect: {
+      reducer(state, action: PayloadAction<AddEffectActionPayload>) {
+        const { trackId, effect } = action.payload;
+        state[trackId].effects.push(effect);
+      },
+      prepare(trackId, effect) {
+        return { payload: { trackId, effect } };
+      },
+    },
+    updateEffectOptions: {
+      reducer(state, action: PayloadAction<UpdateEffectParamActionPayload>) {
+        const { trackId, effectId, options } = action.payload;
+        const effect = find(state[trackId].effects, (effect) => effect.id === effectId);
+        if (effect) {
+          effect.options = options;
+        } else {
+          console.log('could not find the effect object');
+        }
+      },
+      prepare(trackId, effectId, options) {
+        return { payload: { trackId, effectId, options } };
       },
     },
     // todoDeleted(state, action) {
@@ -44,6 +82,6 @@ const tracksSlice = createSlice({
   },
 });
 
-export const { updateParam } = tracksSlice.actions;
+export const { updateParam, addEffect, updateEffectOptions } = tracksSlice.actions;
 
 export default tracksSlice.reducer;

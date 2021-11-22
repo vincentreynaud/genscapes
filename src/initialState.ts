@@ -1,6 +1,6 @@
 import { Scale } from '@tonaljs/tonal';
 import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from './lib/constants';
-import { TrackState } from './types/tracks';
+import { AutoFilterEffect, TrackState } from './types/tracks';
 import { pickRandomElement } from './utils';
 
 const root = pickRandomElement(NOTE_NAMES);
@@ -37,6 +37,15 @@ export const initialTrackState: TrackState = {
     randomiseNoteLength: 0.8,
     interval: 8,
     randomiseInterval: 0.8,
+  },
+};
+
+export const initialAutoFilterState: AutoFilterEffect = {
+  id: 'auto-filter',
+  options: {
+    type: 'sine',
+    frequency: 30,
+    depth: 1,
   },
 };
 

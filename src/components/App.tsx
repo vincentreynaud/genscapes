@@ -1,17 +1,20 @@
 import { memo, useCallback, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import { AMSynth, DuoSynth, Gain, LFO, MonoSynth, Oscillator, Pattern, PolySynth, Synth, Tremolo } from 'tone';
+import { AutoFilter, Gain, Pattern, PolySynth, Synth, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import RangeInput from './RangeInput';
 import NotesModule from './NotesModule';
 import InstrumentModule from './InstrumentModule';
 import CompositionModule from './CompositionModule';
-import { updateParam } from '../reducers/tracks';
+import { updateParam, addEffect, updateEffectOptions } from '../reducers/tracks';
 import { setGlobalParam, setPlay } from '../reducers/global';
 import { setGlobalAudioComponent, setTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
 import { clearDoubleHashes, getCurrentDetune, getCurrentInterval, getCurrentNoteLength } from '../helpers';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import '../styles/index.scss';
+import AddButton from './AddButton';
+import AutoFilterModule from './AutoFilterModule';
+import { EffectId, EffectParams } from '../types/tracks';
 
 const App = memo(() => {
   const trackId = 0;
@@ -42,7 +45,8 @@ const App = memo(() => {
   // init component
   useEffect(() => {
     const outputNode = new Gain(volume).toDestination();
-    const synthLfoNode = new Tremolo(modulationRate, modulationAmount).connect(outputNode).start();
+    const autoFilterNode = new AutoFilter(800).connect(outputNode);
+    const synthLfoNode = new Tremolo(modulationRate, modulationAmount).connect(autoFilterNode).start();
     const synthNode = new PolySynth({
       voice: Synth,
       maxPolyphony: 8,
@@ -53,6 +57,7 @@ const App = memo(() => {
         envelope: { attack, decay, sustain, release },
       },
     }).connect(synthLfoNode);
+    autoFilterNode.set({ frequency: 200, filter: { Q: 1, type: 'lowpass' } });
 
     dispatch(setGlobalAudioComponent('outputNode', outputNode));
     dispatch(setTrackAudioComponent(trackId, 'synthNode', synthNode));
@@ -109,7 +114,11 @@ const App = memo(() => {
   }, [playing, startComposition, stopComposition, synthNode]);
 
   const handleParamChange = (module, param, value, paramGroup = '') => {
-    dispatch(updateParam(module, param, value, paramGroup));
+    dispatch(updateParam(trackId, module, param, value, paramGroup));
+  };
+
+  const handleAddEffect = (effect: any) => {
+    dispatch(addEffect(trackId, effect));
   };
 
   const handleGlobalParamChange = (value: number) => {
@@ -184,7 +193,6 @@ const App = memo(() => {
         wet: modulationAmount,
         frequency: modulationRate,
       });
-      console.log(synthLfoNode.get());
     }
   }, [synthLfoNode, modulationRate, modulationAmount]);
 
@@ -201,6 +209,14 @@ const App = memo(() => {
       composition.pattern.set({ values: scale });
     }
   }
+
+  const MapEffectIdToComponent = {
+    'auto-filter': AutoFilterModule,
+  };
+
+  const handleChangeEffectOptions = (effectId: EffectId, options: EffectParams) => {
+    dispatch(updateEffectOptions(trackId, effectId, options));
+  };
 
   return (
     <div className='content'>
@@ -223,6 +239,11 @@ const App = memo(() => {
       <section className='container-fluid'>
         <div className='row'>
           <InstrumentModule onParamChange={handleParamChange} params={instrument} />
+          {trackParams.effects.map((effect) => {
+            const Component = MapEffectIdToComponent[effect.id];
+            return <Component id={effect.id} params={effect.options} onParamChange={handleChangeEffectOptions} />;
+          })}
+          <AddButton onAdd={handleAddEffect} />
         </div>
       </section>
       <section className='container-fluid'>
