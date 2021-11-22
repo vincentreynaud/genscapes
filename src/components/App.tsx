@@ -6,32 +6,28 @@ import RangeInput from './RangeInput';
 import NotesModule from './NotesModule';
 import InstrumentModule from './InstrumentModule';
 import CompositionModule from './CompositionModule';
-import { updateParam, addEffect, updateEffectOptions } from '../reducers/tracks';
-import { setGlobalParam, setPlay } from '../reducers/global';
+import { updateParam, addEffect, updateEffectOptions, setGlobalParam, setPlay } from '../reducers/params';
 import { setGlobalAudioComponent, setTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
 import { clearDoubleHashes, getCurrentDetune, getCurrentInterval, getCurrentNoteLength } from '../helpers';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import '../styles/index.scss';
 import AddButton from './AddButton';
 import AutoFilterModule from './AutoFilterModule';
-import { EffectId, EffectParams } from '../types/tracks';
+import { EffectId, EffectParams } from '../types/params';
+
+const MapEffectIdToComponent = {
+  'auto-filter': AutoFilterModule,
+};
 
 const App = memo(() => {
   const trackId = 0;
-
   const dispatch = useAppDispatch();
-  const trackParams = useAppSelector((state) => state.tracks[trackId]);
+  const trackParams = useAppSelector((state) => state.params.tracks[trackId]);
   const trackAudio = useAppSelector((state) => state.audio.tracks[trackId]);
-  const globalParams = useAppSelector((state) => state.global);
+  const globalParams = useAppSelector((state) => state.params.global);
   const globalAudio = useAppSelector((state) => state.audio.global);
   const { instrument, notes, composition: compositionParams, effects } = trackParams;
   const { playing, volume } = globalParams;
-
-  // find why to do this...?
-  const latestTrackParams = useRef(trackParams);
-  useEffect(() => {
-    latestTrackParams.current = trackParams;
-  }, [trackParams]);
 
   const { outputNode } = globalAudio;
   const { synthNode, synthLfoNode, composition } = trackAudio;
@@ -113,26 +109,6 @@ const App = memo(() => {
     }
   }, [playing, startComposition, stopComposition, synthNode]);
 
-  const handleParamChange = (module, param, value, paramGroup = '') => {
-    dispatch(updateParam(trackId, module, param, value, paramGroup));
-  };
-
-  const handleAddEffect = (effect: any) => {
-    dispatch(addEffect(trackId, effect));
-  };
-
-  const handleGlobalParamChange = (value: number) => {
-    dispatch(setGlobalParam('volume', value));
-  };
-
-  const handleCompositionChange = (key: 'pattern', value: Pattern<string> | null) => {
-    if (playing) {
-      stopComposition();
-      value?.dispose(); // is that right?
-    }
-    dispatch(setTrackCompositionComponent(trackId, key, value));
-  };
-
   // Change master volume
   useEffect(() => {
     if (outputNode) {
@@ -163,9 +139,9 @@ const App = memo(() => {
       values: notes.scale,
       pattern: 'random',
     });
-    handleCompositionChange('pattern', pattern);
+    handleChangeComposition('pattern', pattern);
     return () => {
-      handleCompositionChange('pattern', null);
+      handleChangeComposition('pattern', null);
     };
   }, [compositionParams, notes.scale, triggerPatternNote]);
 
@@ -200,18 +176,34 @@ const App = memo(() => {
     console.log(note);
     const scaleName = `${note}${octave} ${scaleType}`;
     const scale = clearDoubleHashes(Scale.get(scaleName).notes);
-    handleParamChange('notes', 'root', note);
-    handleParamChange('notes', 'octave', octave);
-    handleParamChange('notes', 'scaleType', scaleType);
-    handleParamChange('notes', 'scaleName', scaleName);
-    handleParamChange('notes', 'scale', scale);
+    handleChangeParam('notes', 'root', note);
+    handleChangeParam('notes', 'octave', octave);
+    handleChangeParam('notes', 'scaleType', scaleType);
+    handleChangeParam('notes', 'scaleName', scaleName);
+    handleChangeParam('notes', 'scale', scale);
     if (composition?.pattern) {
       composition.pattern.set({ values: scale });
     }
   }
 
-  const MapEffectIdToComponent = {
-    'auto-filter': AutoFilterModule,
+  const handleChangeParam = (module, param, value, paramGroup = '') => {
+    dispatch(updateParam(trackId, module, param, value, paramGroup));
+  };
+
+  const handleAddEffect = (effect: any) => {
+    dispatch(addEffect(trackId, effect));
+  };
+
+  const handleChangeGlobalParam = (value: number) => {
+    dispatch(setGlobalParam('volume', value));
+  };
+
+  const handleChangeComposition = (key: 'pattern', value: Pattern<string> | null) => {
+    if (playing) {
+      stopComposition();
+      value?.dispose(); // is that right?
+    }
+    dispatch(setTrackCompositionComponent(trackId, key, value));
   };
 
   const handleChangeEffectOptions = (effectId: EffectId, options: EffectParams) => {
@@ -232,28 +224,36 @@ const App = memo(() => {
             step={0.1}
             unit=''
             initValue={volume}
-            onChange={handleGlobalParamChange}
+            onChange={handleChangeGlobalParam}
           />
         </div>
       </div>
       <section className='container-fluid'>
         <div className='row'>
-          <InstrumentModule onParamChange={handleParamChange} params={instrument} />
-          {trackParams.effects.map((effect) => {
+          <InstrumentModule onParamChange={handleChangeParam} params={instrument} />
+          {trackParams.effects.map((effect, i) => {
             const Component = MapEffectIdToComponent[effect.id];
-            return <Component id={effect.id} params={effect.options} onParamChange={handleChangeEffectOptions} />;
+            return (
+              <Component id={effect.id} params={effect.options} onParamChange={handleChangeEffectOptions} key={i} />
+            );
           })}
           <AddButton onAdd={handleAddEffect} />
         </div>
       </section>
       <section className='container-fluid'>
         <div className='row'>
-          <NotesModule onParamChange={handleParamChange} notes={notes} setCurrentScale={setCurrentScale} />
-          <CompositionModule onParamChange={handleParamChange} params={compositionParams} />
+          <NotesModule onParamChange={handleChangeParam} notes={notes} setCurrentScale={setCurrentScale} />
+          <CompositionModule onParamChange={handleChangeParam} params={compositionParams} />
         </div>
       </section>
     </div>
   );
 });
+
+// find why to do this...?
+// const latestTrackParams = useRef(trackParams);
+// useEffect(() => {
+//   latestTrackParams.current = trackParams;
+// }, [trackParams]);
 
 export default App;

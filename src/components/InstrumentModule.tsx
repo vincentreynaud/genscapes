@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { TrackState } from '../types/tracks';
+import { TrackState } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 

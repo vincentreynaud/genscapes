@@ -1,5 +1,5 @@
 import { random, round } from 'lodash';
-import { TrackState } from '../types/tracks';
+import { TrackState } from '../types/params';
 
 export function calcMin(value: number, randomisation: number): number {
   return round(value - randomisation * value, 2);

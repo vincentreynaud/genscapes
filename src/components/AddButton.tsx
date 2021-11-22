@@ -25,7 +25,7 @@ const AddButton = ({ onAdd }: State) => {
           <em>Add effect...</em>
         </option>
         {EFFECT_IDS.map((id) => (
-          <option value={id} id={`${id}-select-option`}>
+          <option key={id} value={id} id={`${id}-select-option`}>
             {EFFECT_NAMES_MAP[id]}
           </option>
         ))}

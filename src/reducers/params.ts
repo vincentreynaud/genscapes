@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { find } from 'lodash';
 import { AutoFilterOptions } from 'tone';
-import { initialTrackState } from '../initialState';
-import { EffectId } from '../types/tracks';
+import { initialParamsState } from '../initialState';
+import { EffectId } from '../types/params';
+import { KeyValuePair } from '../types/shared';
 
-const initialState = [initialTrackState];
+const initialState = initialParamsState;
 
 type UpdateParamActionPayload = {
   trackId: number;
@@ -25,8 +26,8 @@ type UpdateEffectParamActionPayload = {
   options: AutoFilterOptions;
 };
 
-const tracksSlice = createSlice({
-  name: 'tracks',
+const paramsSlice = createSlice({
+  name: 'params',
   initialState,
   reducers: {
     // todoAdded(state, action) {
@@ -38,13 +39,27 @@ const tracksSlice = createSlice({
     //   const todo = state.entities[todoId]
     //   todo.completed = !todo.completed
     // },
+    setPlay(state, action: PayloadAction<boolean>) {
+      state.global.playing = action.payload;
+    },
+    setGlobalParam: {
+      reducer(state, action: PayloadAction<KeyValuePair>) {
+        const { key, value } = action.payload;
+        state.global[key] = value;
+      },
+      prepare(key, value) {
+        return {
+          payload: { key, value },
+        };
+      },
+    },
     updateParam: {
       reducer(state, action: PayloadAction<UpdateParamActionPayload>) {
         const { trackId, module, paramGroup, param, value } = action.payload;
         if (paramGroup) {
-          state[trackId][module][paramGroup][param] = value;
+          state.tracks[trackId][module][paramGroup][param] = value;
         } else {
-          state[trackId][module][param] = value;
+          state.tracks[trackId][module][param] = value;
         }
       },
       prepare(trackId, module, param, value, paramGroup = '') {
@@ -56,7 +71,7 @@ const tracksSlice = createSlice({
     addEffect: {
       reducer(state, action: PayloadAction<AddEffectActionPayload>) {
         const { trackId, effect } = action.payload;
-        state[trackId].effects.push(effect);
+        state.tracks[trackId].effects.push(effect);
       },
       prepare(trackId, effect) {
         return { payload: { trackId, effect } };
@@ -65,7 +80,7 @@ const tracksSlice = createSlice({
     updateEffectOptions: {
       reducer(state, action: PayloadAction<UpdateEffectParamActionPayload>) {
         const { trackId, effectId, options } = action.payload;
-        const effect = find(state[trackId].effects, (effect) => effect.id === effectId);
+        const effect = find(state.tracks[trackId].effects, (effect) => effect.id === effectId);
         if (effect) {
           effect.options = options;
         } else {
@@ -82,6 +97,6 @@ const tracksSlice = createSlice({
   },
 });
 
-export const { updateParam, addEffect, updateEffectOptions } = tracksSlice.actions;
+export const { updateParam, addEffect, updateEffectOptions, setPlay, setGlobalParam } = paramsSlice.actions;
 
-export default tracksSlice.reducer;
+export default paramsSlice.reducer;

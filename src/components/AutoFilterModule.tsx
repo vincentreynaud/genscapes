@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from 'react';
 import { AutoFilterOptions } from 'tone';
-import { EffectId, EffectParams } from '../types/tracks';
+import { EffectId, EffectParams } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 

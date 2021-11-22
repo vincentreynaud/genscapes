@@ -1,6 +1,11 @@
 import { AutoFilterOptions, ToneOscillatorType } from 'tone';
 import { NonCustomOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
 
+export type GlobalParamsState = {
+  playing: boolean;
+  volume: number;
+};
+
 export type TrackState = {
   instrument: {
     name: string;
