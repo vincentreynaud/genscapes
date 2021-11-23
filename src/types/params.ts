@@ -1,4 +1,4 @@
-import { AutoFilterOptions, ToneOscillatorType } from 'tone';
+import { AutoFilterOptions } from 'tone';
 import { NonCustomOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
 
 export type GlobalParamsState = {
@@ -7,28 +7,14 @@ export type GlobalParamsState = {
 };
 
 export type TrackState = {
-  instrument: {
-    name: string;
-    waveform: NonCustomOscillatorType;
-    envelope: {
-      attack: number;
-      decay: number;
-      sustain: number;
-      release: number;
-    };
-    modulationAmount: number;
-    modulationRate: number;
-  };
+  signalChain: Array<TrackInstrumentState | TrackEffectState>;
   notes: {
     root: string;
     scaleType: string;
     scaleName: string;
     scale: string[];
     octave: string;
-    randomiseDetune: number;
-    detune: number;
   };
-  effects: TrackEffect[];
   composition: {
     noteLength: number;
     randomiseNoteLength: number;
@@ -37,14 +23,33 @@ export type TrackState = {
   };
 };
 
-export type TrackEffect = AutoFilterEffect;
-export type EffectId = 'auto-filter' | 'reverb' | 'delay';
-export type EffectParams = AutoFilterOptions;
-
-export interface TrackEffectBase {
-  id: EffectId;
+export interface ParamComponentBaseState {
+  name: EffectName | InstrumentName;
+  type: ParamModuleType;
+  id?: string;
 }
 
-export interface AutoFilterEffect extends TrackEffectBase {
+export interface TrackInstrumentState extends ParamComponentBaseState {
+  waveform: NonCustomOscillatorType;
+  detune: number;
+  randomiseDetune: number;
+  envelope: {
+    attack: number;
+    decay: number;
+    sustain: number;
+    release: number;
+  };
+  modulationAmount: number;
+  modulationRate: number;
+}
+
+export interface AutoFilterEffectState extends ParamComponentBaseState {
   options: Partial<AutoFilterOptions>;
 }
+
+export type TrackEffectState = AutoFilterEffectState;
+
+export type ParamModuleType = 'instrument' | 'effect';
+export type EffectName = 'auto-filter' | 'reverb' | 'delay';
+export type InstrumentName = 'oscillator' | 'synth';
+export type EffectParams = AutoFilterOptions;

@@ -1,6 +1,7 @@
+import { nanoid } from '@reduxjs/toolkit';
 import { Scale } from '@tonaljs/tonal';
 import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from './lib/constants';
-import { AutoFilterEffect, TrackState } from './types/params';
+import { AutoFilterEffectState, TrackEffectState, TrackState } from './types/params';
 import { pickRandomElement } from './utils';
 
 const root = pickRandomElement(NOTE_NAMES);
@@ -12,28 +13,31 @@ const scale = Scale.get(scaleName).notes;
 export const initialTrackId = 0;
 
 export const initialTrackState: TrackState = {
-  instrument: {
-    name: 'oscillator',
-    waveform: 'sine',
-    envelope: {
-      attack: 5.5,
-      decay: 4,
-      sustain: 0.8,
-      release: 8,
+  signalChain: [
+    {
+      name: 'oscillator',
+      type: 'instrument',
+      id: nanoid(),
+      waveform: 'sine',
+      detune: 2,
+      randomiseDetune: 0.2,
+      envelope: {
+        attack: 5.5,
+        decay: 4,
+        sustain: 0.8,
+        release: 8,
+      },
+      modulationAmount: 1,
+      modulationRate: 30,
     },
-    modulationAmount: 1,
-    modulationRate: 30,
-  },
+  ],
   notes: {
     root,
     octave,
     scaleType,
     scaleName,
     scale,
-    randomiseDetune: 0.2,
-    detune: 2,
   },
-  effects: [],
   composition: {
     noteLength: 10,
     randomiseNoteLength: 0.8,
@@ -52,13 +56,26 @@ export const initialParamsState = {
   },
 };
 
-export const initialAutoFilterState: AutoFilterEffect = {
-  id: 'auto-filter',
+export const initialAutoFilterState: AutoFilterEffectState = {
+  name: 'auto-filter',
+  type: 'effect',
   options: {
     type: 'sine',
     frequency: 30,
     depth: 1,
   },
+};
+
+export const initialReverbState: TrackEffectState = {
+  name: 'reverb',
+  type: 'effect',
+  options: {},
+};
+
+export const initialDelayState: TrackEffectState = {
+  name: 'delay',
+  type: 'effect',
+  options: {},
 };
 
 // {

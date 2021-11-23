@@ -1,11 +1,11 @@
 import React, { ChangeEvent } from 'react';
-import { TrackState } from '../types/params';
+import { TrackInstrumentState } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 
 type State = {
   onParamChange: (module, param, value, paramGroup?: string) => void;
-  params: TrackState['instrument'];
+  params: TrackInstrumentState;
 };
 
 const InstrumentModule = ({ onParamChange, params }: State) => {
@@ -19,7 +19,11 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
     onParamChange('instrument', 'waveform', e.target.value);
   };
 
-  const { attack, decay, sustain, release } = params.envelope;
+  const {
+    detune,
+    randomiseDetune,
+    envelope: { attack, decay, sustain, release },
+  } = params;
 
   // min, max & step props of the RangeInput components should be all declared in a constants file
 
@@ -76,6 +80,26 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         unit='s'
         initValue={release}
         onChange={handleParamChange('release', 'envelope')}
+      />
+
+      <h5 className='mt-3'>Detune</h5>
+      <RangeInput
+        label='Amount'
+        min={-50}
+        max={50}
+        step={1}
+        unit='ct'
+        initValue={detune}
+        onChange={handleParamChange('detune')}
+      />
+      <RangeInput
+        label='Randomise'
+        min={0}
+        max={1}
+        step={0.01}
+        unit='%'
+        initValue={randomiseDetune}
+        onChange={handleParamChange('randomiseDetune')}
       />
 
       <h5 className='mt-3'>Modulation</h5>

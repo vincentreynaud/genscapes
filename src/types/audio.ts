@@ -1,4 +1,4 @@
-import { Gain, LFO, Pattern, PolySynth, Synth, Tremolo } from 'tone';
+import { AutoFilter, Delay, Gain, LFO, Pattern, PolySynth, Reverb, Synth, Tremolo } from 'tone';
 
 export type AudioState = {
   tracks: Record<number, TrackAudio>;
@@ -19,3 +19,5 @@ export interface TrackAudio extends TrackAudioNode {
     pattern?: Pattern<string>;
   };
 }
+
+export type ToneAudioEffect = typeof AutoFilter | typeof Reverb | typeof Delay;

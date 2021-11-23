@@ -28,9 +28,8 @@ export function getCurrentInterval(composition: TrackState['composition']) {
   return calcRandom(interval, randomiseInterval);
 }
 
-export function getCurrentDetune(notes: TrackState['notes']) {
-  const { detune, randomiseDetune } = notes;
-  return calcRandom(detune, randomiseDetune);
+export function getCurrentDetune(detune: number, rand: number) {
+  return calcRandom(detune, rand);
 }
 
 export function clearDoubleHashes(scale: string[]) {

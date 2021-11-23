@@ -1,5 +1,4 @@
 import React, { ChangeEvent } from 'react';
-import { initialAutoFilterState } from '../initialState';
 import { EFFECT_IDS, EFFECT_NAMES_MAP } from '../lib/constants';
 import ModuleWrapper from './ModuleWrapper';
 
@@ -7,15 +6,9 @@ type State = {
   onAdd: (effect: any) => void;
 };
 
-const mapInitEffectStatesToIds = {
-  'auto-filter': initialAutoFilterState,
-  reverb: {},
-  delay: {},
-};
-
 const AddButton = ({ onAdd }: State) => {
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onAdd(mapInitEffectStatesToIds[e.target.value]);
+    onAdd(e.target.value);
   };
 
   return (
