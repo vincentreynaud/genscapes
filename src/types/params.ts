@@ -23,13 +23,13 @@ export type TrackState = {
   };
 };
 
-export interface ParamComponentBaseState {
-  name: EffectName | InstrumentName;
-  type: ParamModuleType;
+export interface ModuleBaseState {
+  name: ModuleName;
+  type: ModuleType;
   id?: string;
 }
 
-export interface TrackInstrumentState extends ParamComponentBaseState {
+export interface TrackInstrumentState extends ModuleBaseState {
   waveform: NonCustomOscillatorType;
   detune: number;
   randomiseDetune: number;
@@ -43,13 +43,15 @@ export interface TrackInstrumentState extends ParamComponentBaseState {
   modulationRate: number;
 }
 
-export interface AutoFilterEffectState extends ParamComponentBaseState {
+export type ModuleName = EffectName | InstrumentName;
+export interface AutoFilterEffectState extends ModuleBaseState {
   options: Partial<AutoFilterOptions>;
 }
 
 export type TrackEffectState = AutoFilterEffectState;
 
-export type ParamModuleType = 'instrument' | 'effect';
-export type EffectName = 'auto-filter' | 'reverb' | 'delay';
-export type InstrumentName = 'oscillator' | 'synth';
+export type ModuleType = 'source' | 'effect';
+export type ModuleId = string;
+export type EffectName = 'autoFilter' | 'reverb' | 'delay';
+export type InstrumentName = 'oscillator' | 'synth' | 'polySynth';
 export type EffectParams = AutoFilterOptions;

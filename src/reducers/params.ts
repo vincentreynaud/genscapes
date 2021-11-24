@@ -2,14 +2,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { find } from 'lodash';
 import { AutoFilterOptions } from 'tone';
 import { initialParamsState } from '../initialState';
-import { EffectName, ParamModuleType, TrackEffectState } from '../types/params';
+import { EffectName, ModuleType, TrackEffectState } from '../types/params';
 import { KeyValuePair } from '../types/shared';
 
 const initialState = initialParamsState;
 
 type UpdateParamActionPayload = {
   trackId: number;
-  moduleType: ParamModuleType;
+  moduleType: ModuleType;
   paramGroup?: string;
   param: string;
   value: number;
@@ -30,15 +30,6 @@ const paramsSlice = createSlice({
   name: 'params',
   initialState,
   reducers: {
-    // todoAdded(state, action) {
-    //   const todo = action.payload
-    //   state.entities[todo.id] = todo
-    // },
-    // todoToggled(state, action) {
-    //   const todoId = action.payload
-    //   const todo = state.entities[todoId]
-    //   todo.completed = !todo.completed
-    // },
     setPlay(state, action: PayloadAction<boolean>) {
       state.global.playing = action.payload;
     },
@@ -54,6 +45,7 @@ const paramsSlice = createSlice({
       },
     },
     updateParam: {
+      // instead do a similar implementation to updateEffectOptions: just throw the whole options in there
       reducer(state, action: PayloadAction<UpdateParamActionPayload>) {
         const { trackId, moduleType, paramGroup, param, value } = action.payload;
         const module = find(state.tracks[trackId].signalChain, (module) => module.type === moduleType);

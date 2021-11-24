@@ -1,28 +1,29 @@
 import React, { ChangeEvent } from 'react';
 import { AutoFilterOptions } from 'tone';
-import { EffectName, EffectParams } from '../types/params';
+import { EffectName, EffectParams, ModuleId } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 
 type State = {
-  onParamChange: (effectName: EffectName, options: EffectParams) => void;
-  params: any; // AutoFilterOptions
-  onDelete: any;
+  id: ModuleId;
   name: EffectName;
+  params: any; // AutoFilterOptions
+  onParamChange: (effectName: EffectName, effectId: ModuleId, options: EffectParams) => void;
+  onDelete: any;
 };
 
-const AutoFilterModule = ({ onParamChange, name, params, onDelete }: State) => {
+const AutoFilterModule = ({ onParamChange, name, id, params, onDelete }: State) => {
   const { depth, frequency, type } = params;
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const options = { ...params, [e.target.name]: e.target.value };
-    onParamChange(name, options);
+    onParamChange(name, id, options);
   };
 
   const handleParamChange =
     (param: keyof AutoFilterOptions, paramGroup = '') =>
     (value: number) => {
-      onParamChange(name, { ...params, [param]: value });
+      onParamChange(name, id, { ...params, [param]: value });
     };
 
   // min, max & step props of the RangeInput components should be all declared in a constants file
@@ -58,8 +59,8 @@ const AutoFilterModule = ({ onParamChange, name, params, onDelete }: State) => {
 
       <RangeInput
         label='Frequency'
-        min={26}
-        max={19900}
+        min={1}
+        max={60}
         step={0.01}
         unit='Hz'
         initValue={frequency as number}

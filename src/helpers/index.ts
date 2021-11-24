@@ -35,3 +35,9 @@ export function getCurrentDetune(detune: number, rand: number) {
 export function clearDoubleHashes(scale: string[]) {
   return scale.map((note) => note.replace(/##/g, '#'));
 }
+
+export function updateUrlQuery(trackParams: Record<number, TrackState>) {
+  const url = new URL(document.location.href);
+  url.searchParams.set('p', JSON.stringify(trackParams));
+  window.history.replaceState({}, 'title', url.href);
+}

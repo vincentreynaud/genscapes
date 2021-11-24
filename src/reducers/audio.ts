@@ -1,11 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Gain, Pattern, PolySynth, Synth } from 'tone';
-import { AudioState } from '../types/audio';
+import { AudioModule, AudioState } from '../types/audio';
+import { ModuleType } from '../types/params';
 import { KeyValuePair } from '../types/shared';
 
 const initialState = {
   tracks: {
-    0: {},
+    0: {
+      signalChain: [],
+      composition: {},
+    },
   },
   global: {
     outputNode: null,
@@ -16,10 +20,9 @@ interface SetGlobalAudioComponentActionPayload extends KeyValuePair {
   value: Gain | PolySynth;
 }
 
-type SetTrackAudioComponentActionPayload = {
+type ChainTrackAudioComponentActionPayload = {
   trackId: number;
-  type: 'synthNode';
-  value: Synth | PolySynth;
+  value: AudioModule;
 };
 
 type SetTrackCompositionComponentActionPayload = {
@@ -43,19 +46,15 @@ const audioSlice = createSlice({
         };
       },
     },
-    setTrackAudioComponent: {
-      reducer(state, action: PayloadAction<SetTrackAudioComponentActionPayload>) {
-        const { trackId, type, value } = action.payload;
+    chainTrackAudioComponent: {
+      reducer(state, action: PayloadAction<ChainTrackAudioComponentActionPayload>) {
+        const { trackId, value } = action.payload;
         // find if there is already audio for this trackId?
-        state.tracks[trackId] = {
-          ...state.tracks[trackId],
-          [type]: value,
-          composition: {},
-        };
+        state.tracks[trackId].signalChain.push(value);
       },
-      prepare(trackId, type, value) {
+      prepare(trackId, value) {
         return {
-          payload: { trackId, type, value },
+          payload: { trackId, value },
         };
       },
     },
@@ -64,11 +63,7 @@ const audioSlice = createSlice({
         const { trackId, type, value } = action.payload;
         // find if there is already audio for this trackId
         if (state.tracks[trackId] && state.tracks[trackId].composition) {
-          const updatedTrack = {
-            ...state.tracks[trackId],
-            composition: { [type]: value },
-          };
-          state.tracks[trackId] = updatedTrack;
+          state.tracks[trackId].composition = { [type]: value };
         }
       },
       prepare(trackId: number, type: 'pattern', value: Pattern<string> | null) {
@@ -82,6 +77,6 @@ const audioSlice = createSlice({
 
 const { actions, reducer } = audioSlice;
 
-export const { setTrackAudioComponent, setTrackCompositionComponent, setGlobalAudioComponent } = actions;
+export const { chainTrackAudioComponent, setTrackCompositionComponent, setGlobalAudioComponent } = actions;
 
 export default reducer;

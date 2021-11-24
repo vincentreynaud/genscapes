@@ -5,10 +5,10 @@ export const NOTE_NAMES = Note.names(['C', 'C#', 'Dd', 'D', 'Eb', 'E', 'F', 'F#'
 export const SCALE_TYPES = Scale.names();
 export const OCTAVES = range(1, 8);
 
-export const EFFECT_IDS = ['auto-filter', 'reverb', 'delay'];
+export const EFFECT_IDS = ['autoFilter', 'reverb', 'delay'];
 
 export const EFFECT_NAMES_MAP = {
-  'auto-filter': 'Auto Filter',
+  autoFilter: 'Auto Filter',
   reverb: 'Reverb',
   delay: 'Delay',
 };

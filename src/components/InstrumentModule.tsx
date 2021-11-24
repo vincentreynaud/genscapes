@@ -12,11 +12,11 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
   const handleParamChange =
     (param, paramGroup = '') =>
     (value: number) => {
-      onParamChange('instrument', param, value, paramGroup);
+      onParamChange('source', param, value, paramGroup);
     };
 
   const handleWaveformChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onParamChange('instrument', 'waveform', e.target.value);
+    onParamChange('source', 'waveform', e.target.value);
   };
 
   const {
@@ -28,7 +28,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
   // min, max & step props of the RangeInput components should be all declared in a constants file
 
   return (
-    <ModuleWrapper id='instrument' title='Oscillator'>
+    <ModuleWrapper id='source' title='Oscillator'>
       <select name='waveform' id='waveform-select' onChange={handleWaveformChange}>
         <option value='sine' id='sine-wave'>
           Sine Wave

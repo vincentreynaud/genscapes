@@ -7,39 +7,50 @@ import NotesModule from './NotesModule';
 import InstrumentModule from './InstrumentModule';
 import CompositionModule from './CompositionModule';
 import { updateParam, addEffect, updateEffectOptions, setGlobalParam, setPlay } from '../reducers/params';
-import { setGlobalAudioComponent, setTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
-import { clearDoubleHashes, getCurrentDetune, getCurrentInterval, getCurrentNoteLength } from '../helpers';
+import { setGlobalAudioComponent, chainTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
+import {
+  clearDoubleHashes,
+  getCurrentDetune,
+  getCurrentInterval,
+  getCurrentNoteLength,
+  updateUrlQuery,
+} from '../helpers';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import '../styles/index.scss';
 import AddButton from './AddButton';
 import AutoFilterModule from './AutoFilterModule';
-import { EffectName, EffectParams, TrackEffectState } from '../types/params';
+import { EffectName, EffectParams, ModuleId, TrackEffectState } from '../types/params';
 import { initialAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
 import { ToneAudioEffect } from '../types/audio';
 import {
-  makeSelectParamComponentByType,
+  makeSelectAudioModuleByType,
+  makeSelectParamModuleByType,
+  makeSelectToneNodesByType,
   makeSelectTrackAudio,
   makeSelectTrackParams,
   selectGlobalAudio,
   selectGlobalParams,
+  SelectSourceNodes,
 } from '../selectors';
+import { nanoid } from '@reduxjs/toolkit';
+import { find } from 'lodash';
 
 type EffectUiComponent = typeof AutoFilterModule;
 
 const mapEffectNameToUiComponent: Record<EffectName, EffectUiComponent> = {
-  'auto-filter': AutoFilterModule,
+  autoFilter: AutoFilterModule,
   reverb: AutoFilterModule,
   delay: AutoFilterModule,
 };
 
 const mapEffectNameToToneComponent: Record<EffectName, ToneAudioEffect> = {
-  'auto-filter': AutoFilter,
+  autoFilter: AutoFilter,
   reverb: Reverb,
   delay: Delay,
 };
 
 const mapEffectNameToInitialState: Record<EffectName, TrackEffectState> = {
-  'auto-filter': initialAutoFilterState,
+  autoFilter: initialAutoFilterState,
   reverb: initialReverbState,
   delay: initialDelayState,
 };
@@ -47,8 +58,11 @@ const mapEffectNameToInitialState: Record<EffectName, TrackEffectState> = {
 const App = memo(() => {
   const trackId = 0;
   const dispatch = useAppDispatch();
-  const selectEffects = useMemo(() => makeSelectParamComponentByType(trackId, 'effect'), [trackId]);
-  const selectInstrument = useMemo(() => makeSelectParamComponentByType(trackId, 'instrument'), [trackId]);
+  const selectEffectsParams = useMemo(() => makeSelectParamModuleByType(trackId, 'effect'), [trackId]);
+  const selectSourceParams = useMemo(() => makeSelectParamModuleByType(trackId, 'source'), [trackId]);
+  const selectSourceNodes = useMemo(() => makeSelectToneNodesByType(trackId, 'source'), [trackId]) as SelectSourceNodes;
+  const selectEffectNodes = useMemo(() => makeSelectToneNodesByType(trackId, 'effect'), [trackId]);
+  const selectEffectModules = useMemo(() => makeSelectAudioModuleByType(trackId, 'effect'), [trackId]);
   const selectTrackParams = useMemo(() => makeSelectTrackParams(trackId), [trackId]);
   const selectTrackAudio = useMemo(() => makeSelectTrackAudio(trackId), [trackId]);
   const globalParams = useAppSelector(selectGlobalParams);
@@ -57,12 +71,14 @@ const App = memo(() => {
   const trackAudio = useAppSelector((state) => selectTrackAudio(state));
   const { playing, volume } = globalParams;
   const { outputNode } = globalAudio;
-  const { signalChain, notes, composition: compositionParams } = trackParams;
+  const { notes, composition: compositionParams } = trackParams;
   const { scale } = notes;
-  const { synthNode, synthLfoNode, composition } = trackAudio;
-  const effects = useAppSelector((state) => selectEffects(state));
-  const [instrument] = useAppSelector((state) => selectInstrument(state));
-  console.log('reselect effects', effects);
+  const { signalChain, composition } = trackAudio;
+  const [sourceParams] = useAppSelector((state) => selectSourceParams(state));
+  const effectsParams = useAppSelector((state) => selectEffectsParams(state));
+  const [sourceNode] = useAppSelector((state) => selectSourceNodes(state));
+  const effectModules = useAppSelector((state) => selectEffectModules(state));
+  const effectNodes = useAppSelector((state) => selectEffectNodes(state));
   const {
     waveform,
     envelope: { attack, decay, release, sustain },
@@ -70,13 +86,13 @@ const App = memo(() => {
     modulationAmount,
     detune,
     randomiseDetune,
-  } = instrument;
+  } = sourceParams;
 
   // init component
   useEffect(() => {
     const outputNode = new Gain(volume).toDestination();
     const synthLfoNode = new Tremolo(modulationRate, modulationAmount).start();
-    const synthNode = new PolySynth({
+    const sourceNode = new PolySynth({
       voice: Synth,
       maxPolyphony: 8,
       options: {
@@ -86,34 +102,42 @@ const App = memo(() => {
         envelope: { attack, decay, sustain, release },
       },
     });
-    synthNode.chain(synthLfoNode, outputNode);
-    console.log(outputNode);
+    sourceNode.chain(synthLfoNode, outputNode);
+
+    const synthModule = {
+      name: 'polySynth',
+      type: 'source',
+      id: sourceParams.id,
+      toneNode: sourceNode,
+    };
+    const lfoModule = { name: 'tremolo', type: 'effect', id: sourceParams.id, toneNode: synthLfoNode };
 
     dispatch(setGlobalAudioComponent('outputNode', outputNode));
-    dispatch(setTrackAudioComponent(trackId, 'synthNode', synthNode));
-    dispatch(setTrackAudioComponent(trackId, 'synthLfoNode', synthLfoNode));
+    // TODO: RESET SIGNAL CHAIN ON NEW SOURCE SET UP
+    dispatch(chainTrackAudioComponent(trackId, synthModule));
+    dispatch(chainTrackAudioComponent(trackId, lfoModule));
     console.log('init');
-
-    // window.addEventListener('keydown', (e: KeyboardEvent) => {
-    //   if (e.key === ' ') {
-    //     togglePlay();
-    //   }
-    // });
-
-    return () => {
-      // synthNode.dispose();
-      // outputNode.dispose();
-    };
   }, []);
 
-  const handleAddEffect = (effectName: EffectName) => {
-    const effectState = mapEffectNameToInitialState[effectName];
-    const ToneEffect = mapEffectNameToToneComponent[effectName];
-    const effectNode = new ToneEffect();
-    effectNode.set(effectState.options);
-    // autoFilterNode.set({ frequency: 200, filter: { Q: 1, type: 'lowpass' } });
-    dispatch(addEffect(trackId, effectState));
-  };
+  const handleAddEffect = useCallback(
+    (name: EffectName) => {
+      if (outputNode) {
+        const id = nanoid();
+        const effectState = mapEffectNameToInitialState[name];
+        const ToneEffect = mapEffectNameToToneComponent[name];
+        const toneEffectNode = new ToneEffect();
+        toneEffectNode.set(effectState.options);
+        sourceNode.disconnect();
+        sourceNode.chain(...effectNodes, outputNode);
+        // autoFilterNode.set({ frequency: 200, filter: { Q: 1, type: 'lowpass' } });
+        dispatch(addEffect(trackId, { id, ...effectState }));
+        dispatch(chainTrackAudioComponent(trackId, { name, id, type: 'effect', toneNode: toneEffectNode }));
+      } else {
+        console.error('store output node is null');
+      }
+    },
+    [dispatch, sourceNode, effectNodes, outputNode]
+  );
 
   const togglePlay = useCallback(() => {
     if (!playing) {
@@ -147,10 +171,9 @@ const App = memo(() => {
       startComposition();
     } else {
       stopComposition();
-      // @ts-ignore
-      synthNode?.releaseAll();
+      sourceNode?.releaseAll();
     }
-  }, [playing, startComposition, stopComposition, synthNode]);
+  }, [playing, startComposition, stopComposition, sourceNode]);
 
   // Change master volume
   useEffect(() => {
@@ -167,10 +190,10 @@ const App = memo(() => {
       const interval = getCurrentInterval(compositionParams);
       const currentDetune = getCurrentDetune(detune, randomiseDetune);
       console.log(note, currentDetune, 'interval', interval, 'noteLength', noteLength);
-      synthNode?.set({ detune: currentDetune });
-      synthNode?.triggerAttackRelease(note, noteLength, time + interval);
+      sourceNode?.set({ detune: currentDetune });
+      sourceNode?.triggerAttackRelease(note, noteLength, time + interval);
     },
-    [synthNode, compositionParams, detune, randomiseDetune]
+    [sourceNode, compositionParams, detune, randomiseDetune]
   );
 
   // Update pattern
@@ -195,25 +218,25 @@ const App = memo(() => {
     }
   }, [composition?.pattern]);
 
-  // Update synthNode on instrument params change
+  // Update sourceNode on instrument params change
   useEffect(() => {
-    if (synthNode) {
-      synthNode.set({
+    if (sourceNode) {
+      sourceNode.set({
         envelope: { attack, decay, sustain, release },
         oscillator: { type: waveform },
       });
     }
-  }, [synthNode, attack, decay, sustain, release, waveform]);
+  }, [sourceNode, attack, decay, sustain, release, waveform]);
 
   // Update synthLfoNode on params change
-  useEffect(() => {
-    if (synthLfoNode) {
-      synthLfoNode.set({
-        wet: modulationAmount,
-        frequency: modulationRate,
-      });
-    }
-  }, [synthLfoNode, modulationRate, modulationAmount]);
+  // useEffect(() => {
+  //   if (synthLfoNode) {
+  //     synthLfoNode.set({
+  //       wet: modulationAmount,
+  //       frequency: modulationRate,
+  //     });
+  //   }
+  // }, [synthLfoNode, modulationRate, modulationAmount]);
 
   function setCurrentScale(note: string, octave: string, scaleType: string) {
     console.log(note);
@@ -247,9 +270,20 @@ const App = memo(() => {
 
   const handleDeleteEffect = (effectName: string) => {};
 
-  const handleChangeEffectOptions = (effectName: EffectName, options: EffectParams) => {
-    dispatch(updateEffectOptions(trackId, effectName, options));
+  const handleChangeEffectOptions = (effectName: EffectName, effectId: ModuleId, options: EffectParams) => {
+    const mod = find(effectModules, (node) => node.id === effectId);
+    if (mod) {
+      mod.toneNode.set(options);
+      dispatch(updateEffectOptions(trackId, effectName, options));
+      mod.toneNode.get();
+    } else {
+      console.error("couldn't find audio module");
+    }
   };
+
+  useEffect(() => {
+    updateUrlQuery(trackParams);
+  }, [trackParams]);
 
   return (
     <div className='content'>
@@ -271,12 +305,13 @@ const App = memo(() => {
       </div>
       <section className='container-fluid'>
         <div className='row'>
-          <InstrumentModule onParamChange={handleChangeParam} params={instrument} />
-          {effects.map((effect, i) => {
+          <InstrumentModule onParamChange={handleChangeParam} params={sourceParams} />
+          {effectsParams.map((effect, i) => {
             const Component = mapEffectNameToUiComponent[effect.name];
             return (
               <Component
                 name={effect.name}
+                id={effect.id}
                 params={effect.options}
                 onParamChange={handleChangeEffectOptions}
                 onDelete={handleDeleteEffect}
@@ -297,10 +332,16 @@ const App = memo(() => {
   );
 });
 
+export default App;
+
 // find why to do this...?
 // const latestTrackParams = useRef(trackParams);
 // useEffect(() => {
 //   latestTrackParams.current = trackParams;
 // }, [trackParams]);
 
-export default App;
+// window.addEventListener('keydown', (e: KeyboardEvent) => {
+//   if (e.key === ' ') {
+//     togglePlay();
+//   }
+// });
