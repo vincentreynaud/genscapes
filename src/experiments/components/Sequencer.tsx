@@ -1,8 +1,8 @@
-import "../styles/index.scss";
-import { useEffect, useState } from "react";
-import { getFreq } from "../lib/audio-helpers";
-import Oscillator from "../lib/Oscillator";
-import WAAClock from "waaclock";
+import '../styles/index.scss';
+import { useEffect, useState } from 'react';
+import { getFreq } from '../audio-helpers';
+import Oscillator from '../Oscillator';
+import WAAClock from 'waaclock';
 
 const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
 
@@ -35,7 +35,7 @@ function Sequencer() {
     currentNote: 0,
     nextNoteTime: 0.0,
     queue: [],
-    scale: ["Eb3", "F3", "G3", "Bb3", "C4"],
+    scale: ['Eb3', 'F3', 'G3', 'Bb3', 'C4'],
     notes: {},
     tempo: 120,
     signature: 4,
@@ -57,14 +57,14 @@ function Sequencer() {
     clock.start();
     // console.log(clock);
     setCtx(ctx);
-    console.log("init");
+    console.log('init');
   }, []);
 
   const { tempo, currentNote, nextNoteTime, scheduleAheadTime, isPlaying } = playState;
 
   useEffect(() => {
     if (playState.isPlaying && ctx) {
-      if (ctx.state === "suspended") {
+      if (ctx.state === 'suspended') {
         ctx.resume();
       }
       setPlayState({ ...playState, currentNote: 0, nextNoteTime: ctx.currentTime });
@@ -72,7 +72,7 @@ function Sequencer() {
     } else {
       window.clearTimeout(timerID);
     }
-    console.log("init");
+    console.log('init');
   }, [isPlaying, tempo, currentNote, nextNoteTime, scheduleAheadTime]);
 
   function nextNote({ tempo, nextNoteTime, currentNote }) {
@@ -98,7 +98,7 @@ function Sequencer() {
 
       osc.play(freq, time);
     } else {
-      console.error("Context not initialised");
+      console.error('Context not initialised');
     }
   }
 
@@ -111,7 +111,7 @@ function Sequencer() {
 
       timerID = window.setTimeout(scheduler, lookahead);
     } else {
-      console.error("Context not initialised");
+      console.error('Context not initialised');
     }
   }
 
@@ -185,10 +185,10 @@ function Sequencer() {
   }
 
   return (
-    <div className="content">
-      <div id="main-controls">
-        <button id="play-button" className="btn btn-dark" onClick={togglePlay}>
-          {playState.isPlaying ? "Stop" : "Start"}
+    <div className='content'>
+      <div id='main-controls'>
+        <button id='play-button' className='btn btn-dark' onClick={togglePlay}>
+          {playState.isPlaying ? 'Stop' : 'Start'}
         </button>
       </div>
     </div>

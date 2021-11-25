@@ -1,8 +1,7 @@
 import { nanoid } from '@reduxjs/toolkit';
 import { Scale } from '@tonaljs/tonal';
 import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from './lib/constants';
-import { AutoFilterEffectState, TrackEffectState, TrackInstrumentState, TrackState } from './types/params';
-import { pickRandomElement } from './utils';
+import { pickRandomElement } from './helpers';
 
 const root = pickRandomElement(NOTE_NAMES);
 const octave = pickRandomElement(OCTAVES).toString();

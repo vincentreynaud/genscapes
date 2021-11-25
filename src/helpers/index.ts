@@ -1,6 +1,8 @@
 import { random, round } from 'lodash';
 import { TrackState } from '../types/params';
 
+export const pickRandomElement = (arr: any[] = []) => arr[random(0, arr.length - 1)];
+
 export function calcMin(value: number, randomisation: number): number {
   return round(value - randomisation * value, 2);
 }

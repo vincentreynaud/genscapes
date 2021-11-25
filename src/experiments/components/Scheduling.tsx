@@ -1,10 +1,7 @@
-import "../styles/index.scss";
-import { useEffect, useState } from "react";
-import { getFreq } from "../lib/audio-helpers";
-import Oscillator from "../lib/Oscillator";
-import WAAClock from "waaclock";
-import * as Tone from "tone";
-import { AMOscillator, Clock, Context } from "tone";
+import '../styles/index.scss';
+import { useEffect, useState } from 'react';
+import * as Tone from 'tone';
+import { Clock, Context } from 'tone';
 
 const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
 
@@ -37,7 +34,7 @@ function Scheduling() {
     currentNote: 0,
     nextNoteTime: 0.0,
     queue: [],
-    scale: ["Eb3", "F3", "G3", "Bb3", "C4"],
+    scale: ['Eb3', 'F3', 'G3', 'Bb3', 'C4'],
     notes: {},
     tempo: 120,
     signature: 4,
@@ -49,7 +46,7 @@ function Scheduling() {
   useEffect(() => {
     const ctx = new Context();
     setCtx(ctx);
-    console.log("init");
+    console.log('init');
   }, []);
 
   const synth = new Tone.Synth().toDestination();
@@ -58,11 +55,11 @@ function Scheduling() {
       // the order of the notes passed in depends on the pattern
       synth.triggerAttackRelease(note, 2, time);
     },
-    ["C3", "D4", "E4", "A4"],
-    "random"
+    ['C3', 'D4', 'E4', 'A4'],
+    'random'
   );
 
-  const bla = Tone.Midi(1500, "hz");
+  const bla = Tone.Midi(1500, 'hz');
   console.log(bla);
 
   // const loop = new Tone.Loop((time) => {
@@ -83,10 +80,10 @@ function Scheduling() {
   }
 
   return (
-    <div className="content">
-      <div id="main-controls">
-        <button id="play-button" className="btn btn-dark" onClick={togglePlay}>
-          {playState.isPlaying ? "Stop" : "Start"}
+    <div className='content'>
+      <div id='main-controls'>
+        <button id='play-button' className='btn btn-dark' onClick={togglePlay}>
+          {playState.isPlaying ? 'Stop' : 'Start'}
         </button>
       </div>
     </div>

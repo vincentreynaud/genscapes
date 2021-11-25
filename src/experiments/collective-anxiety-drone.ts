@@ -1,7 +1,7 @@
-import { Scale } from "@tonaljs/tonal";
-import { random } from "lodash";
-import { DroneParams, playDrone, setup } from "./setup-and-play";
-import { moveOctave } from "../utils";
+import { Scale } from '@tonaljs/tonal';
+import { random } from 'lodash';
+import { DroneParams, playDrone, setup } from './setup-and-play';
+import { moveOctave } from './utils';
 
 const SCALE_NAME = `F1 minor six pentatonic`;
 const SCALE_NOTES = Scale.get(SCALE_NAME).notes;
@@ -10,12 +10,12 @@ const drone1Params: DroneParams = {
   notes: SCALE_NOTES,
   minLength: 1,
   maxLength: 15,
-  droneType: "sawtooth",
+  droneType: 'sawtooth',
   droneNextMin: 0,
   droneNextMax: 20,
   droneDetuneMin: 36.0,
   droneDetuneMax: 40.0,
-  filterType: "lowpass",
+  filterType: 'lowpass',
   filterQMin: 1,
   filterQMax: 4,
   filterFreqBase: 0.0,
@@ -29,12 +29,12 @@ const drone2Params: DroneParams = {
   notes: moveOctave(SCALE_NOTES, 2),
   minLength: 1,
   maxLength: 6,
-  droneType: "sine",
+  droneType: 'sine',
   droneNextMin: 25,
   droneNextMax: 48,
   droneDetuneMin: 16.0,
   droneDetuneMax: 20.0,
-  filterType: "bandpass",
+  filterType: 'bandpass',
   filterQMin: 0,
   filterQMax: 1,
   filterFreqBase: 80,
