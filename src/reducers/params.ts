@@ -74,6 +74,11 @@ const paramsSlice = createSlice({
         } else {
           nest[param] = value;
         }
+        // let urlQuery = { ...state[0], [module]: { [param]: value } };
+        // const url = new URL(document.location.href);
+        // url.searchParams.set("track0", JSON.stringify(urlQuery));
+        // window.history.replaceState({}, "title", url.href);
+        // console.log(urlQuery);
       },
       prepare(payload: UpdateTrackParamPayload) {
         return { payload };

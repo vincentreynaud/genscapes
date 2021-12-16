@@ -29,10 +29,8 @@ import AddButton from './AddButton';
 import AutoFilterModule from './AutoFilterModule';
 import {
   EffectName,
-  PartialEffectOptions,
   ModuleField,
   ModuleId,
-  ModuleName,
   ModuleOptions,
   ModuleRandParams,
   EffectParamsModule,
@@ -76,6 +74,7 @@ const mapEffectNameToInitialState: Record<EffectName, EffectParamsModule> = {
 };
 
 const App = memo(() => {
+  const url = new URL(document.location.href);
   const trackId = 0;
   const dispatch = useAppDispatch();
   const selectEffectsParams = useMemo(() => makeSelectParamModuleByType(trackId, 'effect'), [trackId]);
@@ -117,6 +116,8 @@ const App = memo(() => {
     const synthLfoNode = new Tremolo(modulationRate, modulationAmount).start();
     const sourceNode = new PolySynth(sourceParams.options);
     sourceNode.chain(synthLfoNode, outputNode);
+    const p = url.searchParams.get('p');
+    console.log(p);
 
     const synthModule = {
       name: 'polySynth',
@@ -133,8 +134,13 @@ const App = memo(() => {
     console.log('init');
   }, []);
 
+  useEffect(() => {
+    updateUrlQuery(trackParams);
+  }, [trackParams]);
+
   const handleChangeTrackParam = (field: TrackField, param, value, paramGroup = '') => {
     dispatch(updateTrackParam({ trackId, field, param, value, paramGroup }));
+    // updateUrlQuery(trackParams)
   };
 
   // useCallback will be necessary when the tracks change
@@ -324,10 +330,6 @@ const App = memo(() => {
   );
 
   const handleDeleteEffect = (effectName: string) => {};
-
-  useEffect(() => {
-    updateUrlQuery(trackParams);
-  }, [trackParams]);
 
   return (
     <div className='content'>
