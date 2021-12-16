@@ -16,16 +16,16 @@ const initialState = {
   },
 } as AudioState;
 
-interface SetGlobalAudioComponentActionPayload extends KeyValuePair {
+interface SetGlobalAudioComponentPayload extends KeyValuePair {
   value: Gain | PolySynth;
 }
 
-type ChainTrackAudioComponentActionPayload = {
+type ChainTrackAudioComponentPayload = {
   trackId: number;
   value: AudioModule;
 };
 
-type SetTrackCompositionComponentActionPayload = {
+type SetTrackCompositionComponentPayload = {
   trackId: number;
   type: 'pattern';
   value: Pattern<string> | null | any;
@@ -36,7 +36,7 @@ const audioSlice = createSlice({
   initialState,
   reducers: {
     setGlobalAudioComponent: {
-      reducer(state, action: PayloadAction<SetGlobalAudioComponentActionPayload>) {
+      reducer(state, action: PayloadAction<SetGlobalAudioComponentPayload>) {
         const { key, value } = action.payload;
         state.global[key] = value;
       },
@@ -47,7 +47,7 @@ const audioSlice = createSlice({
       },
     },
     chainTrackAudioComponent: {
-      reducer(state, action: PayloadAction<ChainTrackAudioComponentActionPayload>) {
+      reducer(state, action: PayloadAction<ChainTrackAudioComponentPayload>) {
         const { trackId, value } = action.payload;
         // find if there is already audio for this trackId?
         state.tracks[trackId].signalChain.push(value);
@@ -59,7 +59,7 @@ const audioSlice = createSlice({
       },
     },
     setTrackCompositionComponent: {
-      reducer(state, action: PayloadAction<SetTrackCompositionComponentActionPayload>) {
+      reducer(state, action: PayloadAction<SetTrackCompositionComponentPayload>) {
         const { trackId, type, value } = action.payload;
         // find if there is already audio for this trackId
         if (state.tracks[trackId] && state.tracks[trackId].composition) {

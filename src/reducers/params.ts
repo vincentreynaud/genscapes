@@ -1,30 +1,51 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { find } from 'lodash';
-import { AutoFilterOptions } from 'tone';
+import { EnvelopeCurve } from 'tone';
+import { Time } from 'tone/build/esm/core/type/Units';
 import { initialParamsState } from '../initialState';
-import { EffectName, ModuleType, TrackEffectState } from '../types/params';
+import {
+  ModuleField,
+  ModuleId,
+  ModuleName,
+  ModuleOptions,
+  ModuleType,
+  EffectParamsModule,
+  TrackField,
+} from '../types/params';
 import { KeyValuePair } from '../types/shared';
 
 const initialState = initialParamsState;
 
-type UpdateParamActionPayload = {
+type AddEffectPayload = {
   trackId: number;
-  moduleType: ModuleType;
-  paramGroup?: string;
+  effect: EffectParamsModule;
+};
+
+type UpdateTrackParamPayload = {
+  trackId: number;
+  field: TrackField;
   param: string;
-  value: number;
+  value: number | string | string[];
+  paramGroup?: string;
 };
 
-type AddEffectActionPayload = {
+type UpdateModuleParamsPayload = {
   trackId: number;
-  effect: TrackEffectState;
+  modId: ModuleId;
+  field: ModuleField;
+  options: ModuleOptions;
 };
 
-type UpdateEffectParamActionPayload = {
+type UpdateModuleParamPayload = {
   trackId: number;
-  effectName: EffectName;
-  options: AutoFilterOptions;
+  modId: ModuleId;
+  field: ModuleField;
+  param: string;
+  value: UpdateModuleParamValue;
+  paramGroup?: string;
 };
+
+export type UpdateModuleParamValue = number | Record<string, number | Time | string | EnvelopeCurve>;
 
 const paramsSlice = createSlice({
   name: 'params',
@@ -44,44 +65,55 @@ const paramsSlice = createSlice({
         };
       },
     },
-    updateParam: {
-      // instead do a similar implementation to updateEffectOptions: just throw the whole options in there
-      reducer(state, action: PayloadAction<UpdateParamActionPayload>) {
-        const { trackId, moduleType, paramGroup, param, value } = action.payload;
-        const module = find(state.tracks[trackId].signalChain, (module) => module.type === moduleType);
+    updateTrackParam: {
+      reducer(state, action: PayloadAction<UpdateTrackParamPayload>) {
+        const { trackId, field, paramGroup, param, value } = action.payload;
+        const nest = state.tracks[trackId][field];
         if (paramGroup) {
-          module[paramGroup][param] = value;
+          nest[paramGroup][param] = value;
         } else {
-          module[param] = value;
+          nest[param] = value;
         }
       },
-      prepare(trackId, moduleType, param, value, paramGroup = '') {
-        return {
-          payload: { trackId, moduleType, param, value, paramGroup },
-        };
+      prepare(payload: UpdateTrackParamPayload) {
+        return { payload };
+      },
+    },
+    updateModuleParam: {
+      reducer(state, action: PayloadAction<UpdateModuleParamPayload>) {
+        const { trackId, modId, field, paramGroup, param, value } = action.payload;
+        const mod = find(state.tracks[trackId].signalChain, (mod) => mod.id === modId);
+        if (paramGroup) {
+          mod[field][paramGroup][param] = value;
+        } else {
+          mod[field][param] = value;
+        }
+      },
+      prepare(payload: UpdateModuleParamPayload) {
+        return { payload };
+      },
+    },
+    updateModuleParams: {
+      reducer(state, action: PayloadAction<UpdateModuleParamsPayload>) {
+        const { trackId, modId, field, options } = action.payload;
+        const mod = find(state.tracks[trackId].signalChain, (mod) => mod.id === modId);
+        if (mod) {
+          mod[field] = options;
+        } else {
+          console.error('reducers: could not find the module');
+        }
+      },
+      prepare(trackId, modId, field, options) {
+        return { payload: { trackId, modId, field, options } };
       },
     },
     addEffect: {
-      reducer(state, action: PayloadAction<AddEffectActionPayload>) {
+      reducer(state, action: PayloadAction<AddEffectPayload>) {
         const { trackId, effect } = action.payload;
         state.tracks[trackId].signalChain.push(effect);
       },
       prepare(trackId, effect) {
         return { payload: { trackId, effect } };
-      },
-    },
-    updateEffectOptions: {
-      reducer(state, action: PayloadAction<UpdateEffectParamActionPayload>) {
-        const { trackId, effectName, options } = action.payload;
-        const effect = find(state.tracks[trackId].signalChain, (effect) => effect.name === effectName);
-        if (effect) {
-          effect.options = options;
-        } else {
-          console.log('could not find the effect object');
-        }
-      },
-      prepare(trackId, effectName, options) {
-        return { payload: { trackId, effectName, options } };
       },
     },
     // todoDeleted(state, action) {
@@ -90,6 +122,7 @@ const paramsSlice = createSlice({
   },
 });
 
-export const { updateParam, addEffect, updateEffectOptions, setPlay, setGlobalParam } = paramsSlice.actions;
+export const { updateTrackParam, updateModuleParam, addEffect, updateModuleParams, setPlay, setGlobalParam } =
+  paramsSlice.actions;
 
 export default paramsSlice.reducer;

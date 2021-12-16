@@ -1,5 +1,5 @@
-import { round, toNumber } from "lodash";
-import React, { FormEvent, FormEventHandler, useState } from "react";
+import { round, toNumber } from 'lodash';
+import React, { FormEvent, FormEventHandler, useState } from 'react';
 
 type Props = {
   label: string;
@@ -19,7 +19,7 @@ export default function RangeInput({ label, min, max, step, unit, initValue, onC
   };
 
   function formatValue(value: number, unit: string) {
-    const strValue = unit === "%" ? round(value * 100).toString() : value.toString();
+    const strValue = unit === '%' ? round(value * 100).toString() : value.toString();
     return `${strValue}${unit}`;
   }
 
@@ -28,17 +28,17 @@ export default function RangeInput({ label, min, max, step, unit, initValue, onC
   return (
     <div>
       <label>{label}</label>
-      <div className="d-flex align-items-center">
+      <div className='d-flex align-items-center'>
         <input
-          type="range"
-          className="control"
+          type='range'
+          className='control'
           value={value}
           min={min}
           max={max}
           step={step || 0.1}
           onChange={handleInput}
         />
-        <span className="control-value">{formatValue(value, unit)}</span>
+        <span className='control-value'>{formatValue(value, unit)}</span>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import { nanoid } from '@reduxjs/toolkit';
 import { Scale } from '@tonaljs/tonal';
+import { Synth } from 'tone';
 import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from './lib/constants';
+import { AutoFilterParamsModule, EffectParamsModule, SourceParamsModule, TrackState } from './types/params';
 import { pickRandomElement } from './helpers';
 
 const root = pickRandomElement(NOTE_NAMES);
@@ -11,25 +13,36 @@ const scale = Scale.get(scaleName).notes;
 
 export const initialTrackId = 0;
 
-export const initialInstrumentState: TrackInstrumentState = {
-  name: 'synth',
+export const initialSourceState: SourceParamsModule = {
+  name: 'polySynth',
   type: 'source',
   id: nanoid(),
-  waveform: 'sine',
-  detune: 2,
-  randomiseDetune: 0.2,
-  envelope: {
-    attack: 5.5,
-    decay: 4,
-    sustain: 0.8,
-    release: 8,
+  options: {
+    voice: Synth,
+    maxPolyphony: 8,
+    options: {
+      volume: -12,
+      detune: 2,
+      oscillator: { type: 'sine' },
+      envelope: {
+        attack: 5.5,
+        decay: 4,
+        sustain: 0.8,
+        release: 8,
+      },
+    },
   },
-  modulationAmount: 1,
-  modulationRate: 30,
+  rand: {
+    detune: 0,
+  },
+  tremoloOptions: {
+    amount: 1,
+    rate: 30,
+  },
 };
 
 export const initialTrackState: TrackState = {
-  signalChain: [initialInstrumentState],
+  signalChain: [initialSourceState],
   notes: {
     root,
     octave,
@@ -55,7 +68,7 @@ export const initialParamsState = {
   },
 };
 
-export const initialAutoFilterState: AutoFilterEffectState = {
+export const initialAutoFilterState: AutoFilterParamsModule = {
   name: 'autoFilter',
   type: 'effect',
   options: {
@@ -66,13 +79,13 @@ export const initialAutoFilterState: AutoFilterEffectState = {
   },
 };
 
-export const initialReverbState: TrackEffectState = {
+export const initialReverbState: EffectParamsModule = {
   name: 'reverb',
   type: 'effect',
   options: {},
 };
 
-export const initialDelayState: TrackEffectState = {
+export const initialDelayState: EffectParamsModule = {
   name: 'delay',
   type: 'effect',
   options: {},

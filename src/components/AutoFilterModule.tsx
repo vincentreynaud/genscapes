@@ -1,29 +1,36 @@
+import { toInteger } from 'lodash';
 import React, { ChangeEvent } from 'react';
 import { AutoFilterOptions } from 'tone';
-import { EffectName, EffectParams, ModuleId } from '../types/params';
+import { AutoFilterParamsModule, EffectName, PartialEffectOptions, ModuleField, ModuleId } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 
 type State = {
-  id: ModuleId;
-  name: EffectName;
-  params: any; // AutoFilterOptions
-  onParamChange: (effectName: EffectName, effectId: ModuleId, options: EffectParams) => void;
+  params: AutoFilterParamsModule; // AutoFilterOptions
+  onParamChange: (modId: ModuleId, field: ModuleField, options: PartialEffectOptions) => void;
   onDelete: any;
 };
 
-const AutoFilterModule = ({ onParamChange, name, id, params, onDelete }: State) => {
-  const { depth, frequency, type } = params;
+const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
+  const {
+    id,
+    name,
+    options: { depth, frequency, type },
+  } = params;
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const options = { ...params, [e.target.name]: e.target.value };
-    onParamChange(name, id, options);
+    const options = { ...params.options, [e.target.name]: e.target.value };
+    if (id) {
+      onParamChange(id, 'options', options);
+    } else {
+      console.error(`module id is ${id}`);
+    }
   };
 
   const handleParamChange =
     (param: keyof AutoFilterOptions, paramGroup = '') =>
     (value: number) => {
-      onParamChange(name, id, { ...params, [param]: value });
+      onParamChange(id!, 'options', { ...params.options, [param]: value });
     };
 
   // min, max & step props of the RangeInput components should be all declared in a constants file
@@ -63,7 +70,7 @@ const AutoFilterModule = ({ onParamChange, name, id, params, onDelete }: State) 
         max={60}
         step={0.01}
         unit='Hz'
-        initValue={frequency as number}
+        initValue={toInteger(frequency)}
         onChange={handleParamChange('frequency')}
       />
       <RangeInput
@@ -72,7 +79,7 @@ const AutoFilterModule = ({ onParamChange, name, id, params, onDelete }: State) 
         max={1}
         step={0.0001}
         unit='%'
-        initValue={depth}
+        initValue={toInteger(depth)}
         onChange={handleParamChange('depth')}
       />
     </ModuleWrapper>

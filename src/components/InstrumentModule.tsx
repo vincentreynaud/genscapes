@@ -1,35 +1,58 @@
-import React, { ChangeEvent } from 'react';
-import { TrackInstrumentState } from '../types/params';
+import { toInteger } from 'lodash';
+import React from 'react';
+import { EnvelopeOptions } from 'tone';
+import { UpdateModuleParamValue } from '../reducers/params';
+import { ModuleField, ModuleId, SourceParamsModule } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 
 type State = {
-  onParamChange: (module, param, value, paramGroup?: string) => void;
-  params: TrackInstrumentState;
+  onParamChange: (
+    modId: ModuleId,
+    field: ModuleField,
+    param: string,
+    value: UpdateModuleParamValue,
+    paramGroup?: string
+  ) => void;
+  params: SourceParamsModule;
 };
 
 const InstrumentModule = ({ onParamChange, params }: State) => {
-  const handleParamChange =
-    (param, paramGroup = '') =>
-    (value: number) => {
-      onParamChange('source', param, value, paramGroup);
-    };
+  const {
+    name,
+    id,
+    options: { voice, maxPolyphony, options },
+    rand,
+    tremoloOptions,
+  } = params;
 
-  const handleWaveformChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onParamChange('source', 'waveform', e.target.value);
+  const handleEnvelopeChange = (param: keyof EnvelopeOptions) => (v: number) => {
+    const value = { ...options?.envelope, [param]: v };
+    onParamChange(id!, 'options', 'envelope', value, 'options');
   };
 
-  const {
-    detune,
-    randomiseDetune,
-    envelope: { attack, decay, sustain, release },
-  } = params;
+  const handleDetuneChange = (type: 'amount' | 'rand') => (v: number) => {
+    if (type === 'amount') {
+      onParamChange(id!, 'options', 'detune', v, 'options');
+    } else {
+      onParamChange(id!, 'rand', 'detune', v);
+    }
+  };
+
+  const handleModulationChange = (param: 'rate' | 'amount') => (v: number) => {
+    onParamChange(id!, 'tremoloOptions', param, v);
+  };
 
   // min, max & step props of the RangeInput components should be all declared in a constants file
 
   return (
     <ModuleWrapper id='source' title='Oscillator'>
-      <select name='waveform' id='waveform-select' onChange={handleWaveformChange}>
+      <select
+        name='waveform'
+        id='waveform-select'
+        onChange={(e) => onParamChange(id!, 'options', 'type', toInteger(e.target.value), 'oscillator')}
+        value={options?.oscillator?.type || 'sine'}
+      >
         <option value='sine' id='sine-wave'>
           Sine Wave
         </option>
@@ -51,8 +74,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={15}
         step={0.001}
         unit='s'
-        initValue={attack}
-        onChange={handleParamChange('attack', 'envelope')}
+        initValue={(options?.envelope?.attack as number) || 0.005}
+        onChange={handleEnvelopeChange('attack')}
       />
       <RangeInput
         label='Decay'
@@ -60,8 +83,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={15}
         step={0.001}
         unit='s'
-        initValue={decay}
-        onChange={handleParamChange('decay', 'envelope')}
+        initValue={(options?.envelope?.decay as number) || 0.005}
+        onChange={handleEnvelopeChange('decay')}
       />
       <RangeInput
         label='Sustain'
@@ -69,8 +92,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={1}
         step={0.01}
         unit='%'
-        initValue={sustain}
-        onChange={handleParamChange('sustain', 'envelope')}
+        initValue={(options?.envelope?.sustain as number) || 0}
+        onChange={handleEnvelopeChange('sustain')}
       />
       <RangeInput
         label='Release'
@@ -78,8 +101,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={15}
         step={0.001}
         unit='s'
-        initValue={release}
-        onChange={handleParamChange('release', 'envelope')}
+        initValue={(options?.envelope?.release as number) || 1}
+        onChange={handleEnvelopeChange('release')}
       />
 
       <h5 className='mt-3'>Detune</h5>
@@ -89,8 +112,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={50}
         step={1}
         unit='ct'
-        initValue={detune}
-        onChange={handleParamChange('detune')}
+        initValue={options?.detune || 0}
+        onChange={handleDetuneChange('amount')}
       />
       <RangeInput
         label='Randomise'
@@ -98,8 +121,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={1}
         step={0.01}
         unit='%'
-        initValue={randomiseDetune}
-        onChange={handleParamChange('randomiseDetune')}
+        initValue={rand?.detune || 0}
+        onChange={handleDetuneChange('rand')}
       />
 
       <h5 className='mt-3'>Modulation</h5>
@@ -109,8 +132,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={1}
         step={0.01}
         unit='%'
-        initValue={params.modulationAmount}
-        onChange={handleParamChange('modulationAmount')}
+        initValue={tremoloOptions.amount}
+        onChange={handleModulationChange('amount')}
       />
       <RangeInput
         label='Rate'
@@ -118,8 +141,8 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={60}
         step={0.01}
         unit='Hz'
-        initValue={params.modulationRate}
-        onChange={handleParamChange('modulationRate')}
+        initValue={tremoloOptions.rate}
+        onChange={handleModulationChange('rate')}
       />
     </ModuleWrapper>
   );
