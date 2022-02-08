@@ -14,9 +14,7 @@ const AddButton = ({ onAdd }: State) => {
   return (
     <ModuleWrapper id='add-effect-button' title=''>
       <select name='effect-name' id='effect-select' onChange={handleSelectChange}>
-        <option value=''>
-          <em>Add effect...</em>
-        </option>
+        <option value=''>Add effect...</option>
         {EFFECT_IDS.map((id) => (
           <option key={id} value={id} id={`${id}-select-option`}>
             {EFFECT_NAMES_MAP[id]}

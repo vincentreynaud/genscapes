@@ -117,7 +117,6 @@ const App = memo(() => {
     const sourceNode = new PolySynth(sourceParams.options);
     sourceNode.chain(synthLfoNode, outputNode);
     const p = url.searchParams.get('p');
-    console.log(p);
 
     const synthModule = {
       name: 'polySynth',
@@ -159,7 +158,6 @@ const App = memo(() => {
     dispatch(updateModuleParams(trackId, modId, field, options));
   };
 
-  // Update effects on params change
   const [changedParamsMod]: TrackState['signalChain'] = useWhatChanged([sourceParams, ...effectsParams]);
 
   function isSourceParamsModule(mod: SourceParamsModule | EffectParamsModule): mod is SourceParamsModule {
@@ -170,29 +168,19 @@ const App = memo(() => {
   useEffect(() => {
     if (isSourceParamsModule(changedParamsMod)) {
       if (sourceNode && changedParamsMod) {
+        console.log('updating source node', changedParamsMod);
         sourceNode.set(changedParamsMod.options.options || {});
-
         console.log(sourceNode.get());
       }
     } else {
       const effectMod = find(effectAudioModules, (node) => node.id === changedParamsMod?.id);
       if (effectMod) {
+        console.log('updating effect node', changedParamsMod);
         effectMod.toneNode.set(changedParamsMod.options || {});
         console.log(effectMod.toneNode.get());
       }
     }
   }, [sourceParams, effectsParams, sourceNode, effectAudioModules]);
-
-  // // Update sourceNode on instrument params change
-  // useEffect(() => {
-  //   if (sourceNode) {
-  //     sourceNode.set({
-  //       envelope: { attack, decay, sustain, release },
-  //       oscillator: { type: waveform },
-  //     });
-  //     console.log('prev', sourceNode.get());
-  //   }
-  // }, [sourceNode, attack, decay, sustain, release, waveform]);
 
   // Update synthLfoNode on params change
   // useEffect(() => {
