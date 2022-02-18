@@ -43,3 +43,9 @@ export function updateUrlQuery(trackParams: Record<number, TrackState>) {
   url.searchParams.set('p', JSON.stringify(trackParams));
   window.history.replaceState({}, 'title', url.href);
 }
+
+export function getParamsFromUrl() {
+  const url = new URL(document.location.href);
+  const p = url.searchParams.get('p');
+  return p ? JSON.parse(p) : p;
+}

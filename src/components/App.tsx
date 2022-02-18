@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import * as Tone from 'tone';
-import { AutoFilter, Delay, Gain, Pattern, PolySynth, Reverb, Synth, ToneAudioNode, Tremolo } from 'tone';
+import { AutoFilter, Delay, Gain, Pattern, PolySynth, Reverb, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import RangeInput from './RangeInput';
 import NotesModule from './NotesModule';
@@ -9,11 +9,9 @@ import CompositionModule from './CompositionModule';
 import {
   updateModuleParam as updateModuleParam,
   addEffect,
-  updateModuleParams,
   setGlobalParam,
   setPlay,
   updateTrackParam,
-  UpdateModuleParamValue,
 } from '../reducers/params';
 import { setGlobalAudioComponent, chainTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
 import {
@@ -21,22 +19,20 @@ import {
   getCurrentDetune,
   getCurrentInterval,
   getCurrentNoteLength,
+  getParamsFromUrl,
   updateUrlQuery,
 } from '../helpers';
-import { useAppSelector, useAppDispatch, useEffectDebugger, useWhatChanged } from '../hooks';
+import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
 import '../styles/index.scss';
 import AddButton from './AddButton';
 import AutoFilterModule from './AutoFilterModule';
 import {
   EffectName,
-  ModuleField,
-  ModuleId,
-  ModuleOptions,
-  ModuleRandParams,
   EffectParamsModule,
   TrackField,
   TrackState,
   SourceParamsModule,
+  UpdateModuleParamHelper,
 } from '../types/params';
 import { initialAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
 import { ToneAudioEffect } from '../types/audio';
@@ -110,6 +106,11 @@ const App = memo(() => {
     rand: { detune: randomiseDetune },
   } = sourceParams;
 
+  useEffect(() => {
+    const p = getParamsFromUrl();
+    console.log(p);
+  }, []);
+
   // init component
   useEffect(() => {
     const outputNode = new Gain(volume).toDestination();
@@ -139,23 +140,11 @@ const App = memo(() => {
 
   const handleChangeTrackParam = (field: TrackField, param, value, paramGroup = '') => {
     dispatch(updateTrackParam({ trackId, field, param, value, paramGroup }));
-    // updateUrlQuery(trackParams)
   };
 
   // useCallback will be necessary when the tracks change
-  const handleChangeModuleParam = (
-    modId: ModuleId,
-    field: ModuleField,
-    param: string,
-    value: UpdateModuleParamValue,
-    paramGroup: string = ''
-  ) => {
-    dispatch(updateModuleParam({ trackId, modId, field, param, paramGroup, value }));
-  };
-
-  const handleChangeModuleParams = (modId: ModuleId, field: ModuleField, options: ModuleOptions | ModuleRandParams) => {
-    const mod = find(effectAudioModules, (node) => node.id === modId);
-    dispatch(updateModuleParams(trackId, modId, field, options));
+  const handleChangeModuleParam: UpdateModuleParamHelper = (modId, path, value) => {
+    dispatch(updateModuleParam({ trackId, modId, path, value }));
   };
 
   const [changedParamsMod]: TrackState['signalChain'] = useWhatChanged([sourceParams, ...effectsParams]);
@@ -181,16 +170,6 @@ const App = memo(() => {
       }
     }
   }, [sourceParams, effectsParams, sourceNode, effectAudioModules]);
-
-  // Update synthLfoNode on params change
-  // useEffect(() => {
-  //   if (synthLfoNode) {
-  //     synthLfoNode.set({
-  //       wet: modulationAmount,
-  //       frequency: modulationRate,
-  //     });
-  //   }
-  // }, [synthLfoNode, modulationRate, modulationAmount]);
 
   const togglePlay = useCallback(() => {
     if (!playing) {
@@ -345,7 +324,7 @@ const App = memo(() => {
             return (
               <Component
                 params={effect}
-                onParamChange={handleChangeModuleParams}
+                onParamChange={handleChangeModuleParam}
                 onDelete={handleDeleteEffect}
                 key={i}
               />

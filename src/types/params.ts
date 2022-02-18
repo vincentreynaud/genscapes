@@ -1,6 +1,5 @@
-import { AutoFilterOptions, PolySynthOptions, Synth } from 'tone';
-import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
-import { NonCustomOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
+import { AutoFilterOptions, EnvelopeCurve, PolySynthOptions, Synth } from 'tone';
+import { Time } from 'tone/build/esm/core/type/Units';
 
 export type GlobalParamsState = {
   playing: boolean;
@@ -58,3 +57,27 @@ export type TrackState = {
     randomiseInterval: number;
   };
 };
+
+export type AddEffectPayload = {
+  trackId: number;
+  effect: EffectParamsModule;
+};
+
+export type UpdateTrackParamPayload = {
+  trackId: number;
+  field: TrackField;
+  param: string;
+  value: number | string | string[];
+  paramGroup?: string;
+};
+
+export type UpdateModuleParamPayload = {
+  trackId: number;
+  modId: ModuleId;
+  path: string;
+  value: UpdateModuleParamValue;
+};
+
+export type UpdateModuleParamHelper = (modId: ModuleId, path: string, value: UpdateModuleParamValue) => void;
+
+export type UpdateModuleParamValue = number | string | Record<string, number | Time | string | EnvelopeCurve>;

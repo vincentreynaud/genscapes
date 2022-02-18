@@ -1,19 +1,18 @@
-import { toInteger } from 'lodash';
 import React from 'react';
+import { toInteger } from 'lodash';
 import { EnvelopeOptions } from 'tone';
-import { UpdateModuleParamValue } from '../reducers/params';
-import { ModuleField, ModuleId, SourceParamsModule } from '../types/params';
+import {
+  ModuleField,
+  ModuleId,
+  SourceParamsModule,
+  UpdateModuleParamHelper,
+  UpdateModuleParamValue,
+} from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 
 type State = {
-  onParamChange: (
-    modId: ModuleId,
-    field: ModuleField,
-    param: string,
-    value: UpdateModuleParamValue,
-    paramGroup?: string
-  ) => void;
+  onParamChange: UpdateModuleParamHelper;
   params: SourceParamsModule;
 };
 
@@ -28,19 +27,18 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
 
   const handleEnvelopeChange = (param: keyof EnvelopeOptions) => (v: number) => {
     const value = { ...options?.envelope, [param]: v };
-    onParamChange(id!, 'options', 'envelope', value, 'options');
+    onParamChange(id!, 'options.options.envelope', value);
   };
 
   const handleDetuneChange = (type: 'amount' | 'rand') => (v: number) => {
     if (type === 'amount') {
-      onParamChange(id!, 'options', 'detune', v, 'options');
-    } else {
-      onParamChange(id!, 'rand', 'detune', v);
+      onParamChange(id!, 'options.options.detune', v);
+      onParamChange(id!, 'rand.detune', v);
     }
   };
 
   const handleModulationChange = (param: 'rate' | 'amount') => (v: number) => {
-    onParamChange(id!, 'tremoloOptions', param, v);
+    onParamChange(id!, `tremoloOptions.${param}`, v);
   };
 
   // min, max & step props of the RangeInput components should be all declared in a constants file
@@ -50,7 +48,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
       <select
         name='waveform'
         id='waveform-select'
-        onChange={(e) => onParamChange(id!, 'options', 'type', toInteger(e.target.value), 'oscillator')}
+        onChange={(e) => onParamChange(id!, 'options.oscillator.type', toInteger(e.target.value))}
         value={options?.oscillator?.type || 'sine'}
       >
         <option value='sine' id='sine-wave'>

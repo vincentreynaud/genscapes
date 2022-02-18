@@ -1,13 +1,13 @@
-import { toInteger } from 'lodash';
 import React, { ChangeEvent } from 'react';
+import { toInteger } from 'lodash';
 import { AutoFilterOptions } from 'tone';
-import { AutoFilterParamsModule, EffectName, PartialEffectOptions, ModuleField, ModuleId } from '../types/params';
+import { AutoFilterParamsModule, UpdateModuleParamHelper } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import RangeInput from './RangeInput';
 
 type State = {
   params: AutoFilterParamsModule; // AutoFilterOptions
-  onParamChange: (modId: ModuleId, field: ModuleField, options: PartialEffectOptions) => void;
+  onParamChange: UpdateModuleParamHelper;
   onDelete: any;
 };
 
@@ -19,9 +19,8 @@ const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
   } = params;
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const options = { ...params.options, [e.target.name]: e.target.value };
     if (id) {
-      onParamChange(id, 'options', options);
+      onParamChange(id, `options.${e.target.name}`, e.target.value);
     } else {
       console.error(`module id is ${id}`);
     }
@@ -30,7 +29,7 @@ const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
   const handleParamChange =
     (param: keyof AutoFilterOptions, paramGroup = '') =>
     (value: number) => {
-      onParamChange(id!, 'options', { ...params.options, [param]: value });
+      onParamChange(id!, `options${paramGroup ? '.' + paramGroup : ''}.${param}`, value);
     };
 
   // min, max & step props of the RangeInput components should be all declared in a constants file
