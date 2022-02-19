@@ -11,7 +11,7 @@ const scaleType = pickRandomElement(SCALE_TYPES);
 const scaleName = `${root}${octave} ${scaleType}`;
 const scale = Scale.get(scaleName).notes;
 
-export const initialTrackId = 0;
+export const initialTrackId: number = 0;
 
 export const initialSourceState: SourceParamsModule = {
   name: 'polySynth',

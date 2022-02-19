@@ -12,6 +12,7 @@ import {
   setGlobalParam,
   setPlay,
   updateTrackParam,
+  updateAllParams,
 } from '../reducers/params';
 import { setGlobalAudioComponent, chainTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
 import {
@@ -20,6 +21,7 @@ import {
   getCurrentInterval,
   getCurrentNoteLength,
   getParamsFromUrl,
+  isTracksStateType,
   updateUrlQuery,
 } from '../helpers';
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
@@ -33,6 +35,7 @@ import {
   TrackState,
   SourceParamsModule,
   UpdateModuleParamHelper,
+  PolySynthParamsModule,
 } from '../types/params';
 import { initialAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
 import { ToneAudioEffect } from '../types/audio';
@@ -45,6 +48,7 @@ import {
   selectGlobalAudio,
   selectGlobalParams,
   SelectSourceNodes,
+  selectTracksParams,
 } from '../selectors';
 import { nanoid } from '@reduxjs/toolkit';
 import { find } from 'lodash';
@@ -70,7 +74,6 @@ const mapEffectNameToInitialState: Record<EffectName, EffectParamsModule> = {
 };
 
 const App = memo(() => {
-  const url = new URL(document.location.href);
   const trackId = 0;
   const dispatch = useAppDispatch();
   const selectEffectsParams = useMemo(() => makeSelectParamModuleByType(trackId, 'effect'), [trackId]);
@@ -82,6 +85,7 @@ const App = memo(() => {
   const selectTrackAudio = useMemo(() => makeSelectTrackAudio(trackId), [trackId]);
   const globalParams = useAppSelector(selectGlobalParams);
   const globalAudio = useAppSelector(selectGlobalAudio);
+  const tracksParams = useAppSelector(selectTracksParams);
   const trackParams = useAppSelector((state) => selectTrackParams(state));
   const trackAudio = useAppSelector((state) => selectTrackAudio(state));
   const { playing, volume } = globalParams;
@@ -104,12 +108,7 @@ const App = memo(() => {
     },
     tremoloOptions: { rate: modulationRate, amount: modulationAmount },
     rand: { detune: randomiseDetune },
-  } = sourceParams;
-
-  useEffect(() => {
-    const p = getParamsFromUrl();
-    console.log(p);
-  }, []);
+  } = sourceParams as any; // just to make it shut up for now
 
   // init component
   useEffect(() => {
@@ -117,7 +116,6 @@ const App = memo(() => {
     const synthLfoNode = new Tremolo(modulationRate, modulationAmount).start();
     const sourceNode = new PolySynth(sourceParams.options);
     sourceNode.chain(synthLfoNode, outputNode);
-    const p = url.searchParams.get('p');
 
     const synthModule = {
       name: 'polySynth',
@@ -135,8 +133,17 @@ const App = memo(() => {
   }, []);
 
   useEffect(() => {
-    updateUrlQuery(trackParams);
-  }, [trackParams]);
+    const value = getParamsFromUrl();
+    if (!isTracksStateType(value)) {
+      console.error("Prevented state update because the url query params structure differs from the app's state one");
+    } else {
+      dispatch(updateAllParams({ value }));
+    }
+  }, []);
+
+  useEffect(() => {
+    updateUrlQuery(tracksParams);
+  }, [tracksParams]);
 
   const handleChangeTrackParam = (field: TrackField, param, value, paramGroup = '') => {
     dispatch(updateTrackParam({ trackId, field, param, value, paramGroup }));
@@ -159,14 +166,12 @@ const App = memo(() => {
       if (sourceNode && changedParamsMod) {
         console.log('updating source node', changedParamsMod);
         sourceNode.set(changedParamsMod.options.options || {});
-        console.log(sourceNode.get());
       }
     } else {
       const effectMod = find(effectAudioModules, (node) => node.id === changedParamsMod?.id);
       if (effectMod) {
         console.log('updating effect node', changedParamsMod);
         effectMod.toneNode.set(changedParamsMod.options || {});
-        console.log(effectMod.toneNode.get());
       }
     }
   }, [sourceParams, effectsParams, sourceNode, effectAudioModules]);
@@ -251,7 +256,6 @@ const App = memo(() => {
   }, [composition?.pattern]);
 
   function setCurrentScale(note: string, octave: string, scaleType: string) {
-    console.log(note);
     const scaleName = `${note}${octave} ${scaleType}`;
     const scale = clearDoubleHashes(Scale.get(scaleName).notes);
     handleChangeTrackParam('notes', 'root', note);
@@ -305,20 +309,12 @@ const App = memo(() => {
           {playing ? 'Stop' : 'Start'}
         </button>
         <div id='volume'>
-          <RangeInput
-            label=''
-            min={0}
-            max={1}
-            step={0.1}
-            unit=''
-            initValue={volume}
-            onChange={handleChangeGlobalParam}
-          />
+          <RangeInput label='' min={0} max={1} step={0.1} unit='' value={volume} onChange={handleChangeGlobalParam} />
         </div>
       </div>
       <section className='container-fluid'>
         <div className='row'>
-          <InstrumentModule onParamChange={handleChangeModuleParam} params={sourceParams} />
+          <InstrumentModule onParamChange={handleChangeModuleParam} params={sourceParams as PolySynthParamsModule} />
           {effectsParams.map((effect, i) => {
             const Component = mapEffectNameToUiComponent[effect.name];
             return (

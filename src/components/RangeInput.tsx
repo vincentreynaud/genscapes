@@ -1,5 +1,6 @@
-import { round, toNumber } from 'lodash';
-import React, { FormEvent, FormEventHandler, useState } from 'react';
+import React, { FormEvent } from 'react';
+import round from 'lodash/round';
+import toNumber from 'lodash/toNumber';
 
 type Props = {
   label: string;
@@ -7,14 +8,13 @@ type Props = {
   max: number;
   step?: number;
   unit: string;
-  initValue: number;
+  value: number;
   onChange?: (v: number) => void;
 };
 
-export default function RangeInput({ label, min, max, step, unit, initValue, onChange }: Props) {
+export default function RangeInput({ label, min, max, step, unit, value, onChange }: Props) {
   const handleInput = (e: FormEvent<HTMLInputElement>) => {
     const v = toNumber(e.currentTarget.value);
-    setValue(v);
     if (onChange) onChange(v);
   };
 
@@ -22,8 +22,6 @@ export default function RangeInput({ label, min, max, step, unit, initValue, onC
     const strValue = unit === '%' ? round(value * 100).toString() : value.toString();
     return `${strValue}${unit}`;
   }
-
-  const [value, setValue] = useState(initValue);
 
   return (
     <div>

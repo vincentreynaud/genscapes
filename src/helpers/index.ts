@@ -1,5 +1,7 @@
 import { random, round } from 'lodash';
-import { TrackState } from '../types/params';
+import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
+import { initialTrackId } from '../initialState';
+import { TracksState, TrackState } from '../types/params';
 
 export const pickRandomElement = (arr: any[] = []) => arr[random(0, arr.length - 1)];
 
@@ -38,9 +40,9 @@ export function clearDoubleHashes(scale: string[]) {
   return scale.map((note) => note.replace(/##/g, '#'));
 }
 
-export function updateUrlQuery(trackParams: Record<number, TrackState>) {
+export function updateUrlQuery(tracksParams: TracksState) {
   const url = new URL(document.location.href);
-  url.searchParams.set('p', JSON.stringify(trackParams));
+  url.searchParams.set('p', JSON.stringify(tracksParams));
   window.history.replaceState({}, 'title', url.href);
 }
 
@@ -48,4 +50,12 @@ export function getParamsFromUrl() {
   const url = new URL(document.location.href);
   const p = url.searchParams.get('p');
   return p ? JSON.parse(p) : p;
+}
+
+// function with type predicate return type
+export function isTracksStateType(p: any): p is TracksState {
+  if (!p) {
+    return false;
+  }
+  return p[initialTrackId]?.notes?.root !== undefined && p[initialTrackId]?.composition?.noteLength !== undefined;
 }

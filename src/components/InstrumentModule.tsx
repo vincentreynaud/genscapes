@@ -72,7 +72,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={15}
         step={0.001}
         unit='s'
-        initValue={(options?.envelope?.attack as number) || 0.005}
+        value={(options?.envelope?.attack as number) || 0.005}
         onChange={handleEnvelopeChange('attack')}
       />
       <RangeInput
@@ -81,7 +81,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={15}
         step={0.001}
         unit='s'
-        initValue={(options?.envelope?.decay as number) || 0.005}
+        value={(options?.envelope?.decay as number) || 0.005}
         onChange={handleEnvelopeChange('decay')}
       />
       <RangeInput
@@ -90,7 +90,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={1}
         step={0.01}
         unit='%'
-        initValue={(options?.envelope?.sustain as number) || 0}
+        value={(options?.envelope?.sustain as number) || 0}
         onChange={handleEnvelopeChange('sustain')}
       />
       <RangeInput
@@ -99,7 +99,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={15}
         step={0.001}
         unit='s'
-        initValue={(options?.envelope?.release as number) || 1}
+        value={(options?.envelope?.release as number) || 1}
         onChange={handleEnvelopeChange('release')}
       />
 
@@ -110,7 +110,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={50}
         step={1}
         unit='ct'
-        initValue={options?.detune || 0}
+        value={options?.detune || 0}
         onChange={handleDetuneChange('amount')}
       />
       <RangeInput
@@ -119,7 +119,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={1}
         step={0.01}
         unit='%'
-        initValue={rand?.detune || 0}
+        value={rand?.detune || 0}
         onChange={handleDetuneChange('rand')}
       />
 
@@ -130,7 +130,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={1}
         step={0.01}
         unit='%'
-        initValue={tremoloOptions.amount}
+        value={tremoloOptions.amount}
         onChange={handleModulationChange('amount')}
       />
       <RangeInput
@@ -139,7 +139,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         max={60}
         step={0.01}
         unit='Hz'
-        initValue={tremoloOptions.rate}
+        value={tremoloOptions.rate}
         onChange={handleModulationChange('rate')}
       />
     </ModuleWrapper>

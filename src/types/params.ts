@@ -1,5 +1,6 @@
 import { AutoFilterOptions, EnvelopeCurve, PolySynthOptions, Synth } from 'tone';
 import { Time } from 'tone/build/esm/core/type/Units';
+import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
 
 export type GlobalParamsState = {
   playing: boolean;
@@ -41,6 +42,8 @@ export interface PolySynthParamsModule extends ParamsModule<PartialSourceOptions
   };
 }
 
+export type TracksState = Record<number, TrackState>;
+
 export type TrackState = {
   signalChain: Array<SourceParamsModule | EffectParamsModule>;
   notes: {
@@ -76,6 +79,10 @@ export type UpdateModuleParamPayload = {
   modId: ModuleId;
   path: string;
   value: UpdateModuleParamValue;
+};
+
+export type UpdateAllParamsPayload = {
+  value: any;
 };
 
 export type UpdateModuleParamHelper = (modId: ModuleId, path: string, value: UpdateModuleParamValue) => void;

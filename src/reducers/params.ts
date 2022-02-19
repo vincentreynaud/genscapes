@@ -1,11 +1,26 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import find from 'lodash/find';
 import set from 'lodash/set';
+import { getParamsFromUrl, isTracksStateType } from '../helpers';
 import { initialParamsState } from '../initialState';
-import { UpdateTrackParamPayload, UpdateModuleParamPayload, AddEffectPayload } from '../types/params';
+import {
+  UpdateTrackParamPayload,
+  UpdateModuleParamPayload,
+  AddEffectPayload,
+  UpdateAllParamsPayload,
+  PolySynthParamsModule,
+} from '../types/params';
 import { KeyValuePair } from '../types/shared';
 
-const initialState = initialParamsState;
+let initialState = initialParamsState;
+
+// const tracksState = getParamsFromUrl();
+// if (!tracksState || !isTracksStateType(tracksState)) {
+//   console.error("Prevented state update because the url query params structure differs from the app's state one");
+// } else {
+//   initialState = { ...initialState, tracks: tracksState };
+// }
+
 const paramsSlice = createSlice({
   name: 'params',
   initialState,
@@ -38,11 +53,20 @@ const paramsSlice = createSlice({
         return { payload };
       },
     },
+    updateAllParams: {
+      reducer(state, action: PayloadAction<UpdateAllParamsPayload>) {
+        const { value } = action.payload;
+        state.tracks = value;
+      },
+      prepare(payload: UpdateAllParamsPayload) {
+        return { payload };
+      },
+    },
     updateModuleParam: {
       reducer(state, action: PayloadAction<UpdateModuleParamPayload>) {
         const { trackId, modId, path, value } = action.payload;
         const mod = find(state.tracks[trackId].signalChain, (mod) => mod.id === modId);
-        set(mod, path, value);
+        set(mod as PolySynthParamsModule, path, value);
       },
       prepare(payload: UpdateModuleParamPayload) {
         return { payload };
@@ -63,6 +87,7 @@ const paramsSlice = createSlice({
   },
 });
 
-export const { updateTrackParam, updateModuleParam, addEffect, setPlay, setGlobalParam } = paramsSlice.actions;
+export const { updateTrackParam, updateModuleParam, updateAllParams, addEffect, setPlay, setGlobalParam } =
+  paramsSlice.actions;
 
 export default paramsSlice.reducer;

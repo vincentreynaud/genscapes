@@ -69,7 +69,7 @@ const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
         max={60}
         step={0.01}
         unit='Hz'
-        initValue={toInteger(frequency)}
+        value={toInteger(frequency)}
         onChange={handleParamChange('frequency')}
       />
       <RangeInput
@@ -78,7 +78,7 @@ const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
         max={1}
         step={0.0001}
         unit='%'
-        initValue={toInteger(depth)}
+        value={toInteger(depth)}
         onChange={handleParamChange('depth')}
       />
     </ModuleWrapper>

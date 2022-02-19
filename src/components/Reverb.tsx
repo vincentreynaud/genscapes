@@ -12,7 +12,7 @@ import React from 'react';
 // 					max={1}
 // 					step={0.01}
 // 					unit="%"
-// 					initValue={params.delayAmount}
+// 					value={params.delayAmount}
 // 					onChange={onParamChange('delayAmount')}
 // 				/>
 // 				<RangeInput
@@ -21,7 +21,7 @@ import React from 'react';
 // 					max={2}
 // 					step={0.01}
 // 					unit="s"
-// 					initValue={params.delayTime}
+// 					value={params.delayTime}
 // 					onChange={onParamChange('delayTime')}
 // 				/>
 // 				<RangeInput
@@ -30,7 +30,7 @@ import React from 'react';
 // 					max={1}
 // 					step={0.01}
 // 					unit="%"
-// 					initValue={params.delayFeedback}
+// 					value={params.delayFeedback}
 // 					onChange={onParamChange('delayFeedback')}
 // 				/>
 // 			</div>
@@ -43,7 +43,7 @@ import React from 'react';
 // 					max={1}
 // 					step={0.01}
 // 					unit="%"
-// 					initValue={params.reverbAmount}
+// 					value={params.reverbAmount}
 // 					onChange={onParamChange('reverbAmount')}
 // 				/>
 // 				<RangeInput
@@ -52,7 +52,7 @@ import React from 'react';
 // 					max={1800}
 // 					step={0.1}
 // 					unit="Hz"
-// 					initValue={params.reverbFilterFreq}
+// 					value={params.reverbFilterFreq}
 // 					onChange={onParamChange('reverbFilterFreq')}
 // 				/>
 // 				<RangeInput
@@ -61,7 +61,7 @@ import React from 'react';
 // 					max={18}
 // 					step={0.01}
 // 					unit=""
-// 					initValue={params.reverbFilterQ}
+// 					value={params.reverbFilterQ}
 // 					onChange={onParamChange('reverbFilterQ')}
 // 				/>
 // 			</div>
