@@ -43,14 +43,14 @@ export const initialSourceState: SourceParamsModule = {
 
 export const initialTrackState: TrackState = {
   signalChain: [initialSourceState],
-  notes: {
-    root,
-    octave,
-    scaleType,
-    scaleName,
-    scale,
-  },
   composition: {
+    notes: {
+      root,
+      octave,
+      scaleType,
+      scaleName,
+      scale,
+    },
     noteLength: 10,
     randomiseNoteLength: 0.8,
     interval: 8,

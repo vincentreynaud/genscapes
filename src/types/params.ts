@@ -11,6 +11,7 @@ export type ModuleName = EffectName | SourceName;
 export type ModuleType = 'source' | 'effect';
 export type ModuleField = 'options' | 'rand' | 'tremoloOptions';
 export type TrackField = 'composition' | 'notes';
+export type TrackId = number;
 export type ModuleId = string;
 export type ModuleOptions = PartialEffectOptions | PartialSourceOptions;
 export type ModuleRandParams = SourceRandParams;
@@ -46,6 +47,10 @@ export type TracksState = Record<number, TrackState>;
 
 export type TrackState = {
   signalChain: Array<SourceParamsModule | EffectParamsModule>;
+  composition: TrackCompositionState;
+};
+
+export type TrackCompositionState = {
   notes: {
     root: string;
     scaleType: string;
@@ -53,12 +58,10 @@ export type TrackState = {
     scale: string[];
     octave: string;
   };
-  composition: {
-    noteLength: number;
-    randomiseNoteLength: number;
-    interval: number;
-    randomiseInterval: number;
-  };
+  noteLength: number;
+  randomiseNoteLength: number;
+  interval: number;
+  randomiseInterval: number;
 };
 
 export type AddEffectPayload = {
@@ -68,23 +71,25 @@ export type AddEffectPayload = {
 
 export type UpdateTrackParamPayload = {
   trackId: number;
-  field: TrackField;
-  param: string;
-  value: number | string | string[];
-  paramGroup?: string;
+  path: string;
+  value: TrackParamValue;
 };
 
 export type UpdateModuleParamPayload = {
   trackId: number;
   modId: ModuleId;
   path: string;
-  value: UpdateModuleParamValue;
+  value: ModuleParamValue;
 };
 
 export type UpdateAllParamsPayload = {
   value: any;
 };
 
-export type UpdateModuleParamHelper = (modId: ModuleId, path: string, value: UpdateModuleParamValue) => void;
+export type UpdateModuleParamHelper = (modId: ModuleId, path: string, value: ModuleParamValue) => void;
 
-export type UpdateModuleParamValue = number | string | Record<string, number | Time | string | EnvelopeCurve>;
+export type UpdateTrackParamHelper = (path: string, value: TrackParamValue) => void;
+
+export type ModuleParamValue = number | string | Record<string, number | Time | string | EnvelopeCurve>;
+
+export type TrackParamValue = number | string | string[];

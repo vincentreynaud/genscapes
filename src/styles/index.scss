@@ -2,9 +2,39 @@
 @import 'variables';
 
 body {
-  background: rgb(39, 39, 39) !important;
-  color: rgb(215, 215, 215) !important;
-  font-family: 'Courier New', Courier, monospace !important;
+  background: $base-bg !important;
+  color: $base-body-color !important;
+  font-family: $body-font-family !important;
+  font-weight: $body-font-weight !important;
+  font-size: $body-font-size !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  // font-family: $header-font-family;
+}
+
+h1 {
+  font-size: 1.25rem !important;
+}
+h2 {
+  font-size: 1.1rem !important;
+}
+h3 {
+  font-size: 0.9rem !important;
+}
+h4 {
+  font-size: 0.85rem !important;
+}
+h5 {
+  font-size: 0.8rem !important;
+}
+h6 {
+  font-size: 0.8rem !important;
 }
 
 section {
@@ -37,8 +67,8 @@ span.control-value {
 .draggable-input-range {
   .control-wrapper {
     position: relative;
-    height: 24px;
-    width: 80px;
+    height: 1.2rem;
+    width: 4.5rem;
   }
   .control {
     flex: 1;

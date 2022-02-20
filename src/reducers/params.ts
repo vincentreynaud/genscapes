@@ -33,13 +33,8 @@ const paramsSlice = createSlice({
     },
     updateTrackParam: {
       reducer(state, action: PayloadAction<UpdateTrackParamPayload>) {
-        const { trackId, field, paramGroup, param, value } = action.payload;
-        const nest = state.tracks[trackId][field];
-        if (paramGroup) {
-          nest[paramGroup][param] = value;
-        } else {
-          nest[param] = value;
-        }
+        const { trackId, path, value } = action.payload;
+        set(state.tracks[trackId].composition, path, value);
       },
       prepare(payload: UpdateTrackParamPayload) {
         return { payload };

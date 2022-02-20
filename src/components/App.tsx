@@ -3,7 +3,6 @@ import * as Tone from 'tone';
 import { AutoFilter, Delay, Gain, Pattern, PolySynth, Reverb, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import RangeInput from './RangeInput';
-import NotesModule from './NotesModule';
 import InstrumentModule from './InstrumentModule';
 import CompositionModule from './CompositionModule';
 import {
@@ -36,6 +35,7 @@ import {
   SourceParamsModule,
   UpdateModuleParamHelper,
   PolySynthParamsModule,
+  UpdateTrackParamHelper,
 } from '../types/params';
 import { initialAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
 import { ToneAudioEffect } from '../types/audio';
@@ -52,6 +52,7 @@ import {
 } from '../selectors';
 import { nanoid } from '@reduxjs/toolkit';
 import { find } from 'lodash';
+import Track from './Track';
 
 type EffectUiComponent = typeof AutoFilterModule;
 
@@ -90,7 +91,8 @@ const App = memo(() => {
   const trackAudio = useAppSelector((state) => selectTrackAudio(state));
   const { playing, volume } = globalParams;
   const { outputNode } = globalAudio;
-  const { notes, composition: compositionParams } = trackParams;
+  const { composition: compositionParams } = trackParams;
+  const { notes } = compositionParams;
   const { scale } = notes;
   const { signalChain, composition } = trackAudio;
   const [sourceParams] = useAppSelector((state) => selectSourceParams(state));
@@ -147,8 +149,8 @@ const App = memo(() => {
     updateUrlQuery(tracksParams);
   }, [tracksParams]);
 
-  const handleChangeTrackParam = (field: TrackField, param, value, paramGroup = '') => {
-    dispatch(updateTrackParam({ trackId, field, param, value, paramGroup }));
+  const handleChangeTrackParam: UpdateTrackParamHelper = (path, value) => {
+    dispatch(updateTrackParam({ trackId, path, value }));
   };
 
   // useCallback will be necessary when the tracks change
@@ -260,11 +262,11 @@ const App = memo(() => {
   function setCurrentScale(note: string, octave: string, scaleType: string) {
     const scaleName = `${note}${octave} ${scaleType}`;
     const scale = clearDoubleHashes(Scale.get(scaleName).notes);
-    handleChangeTrackParam('notes', 'root', note);
-    handleChangeTrackParam('notes', 'octave', octave);
-    handleChangeTrackParam('notes', 'scaleType', scaleType);
-    handleChangeTrackParam('notes', 'scaleName', scaleName);
-    handleChangeTrackParam('notes', 'scale', scale);
+    handleChangeTrackParam('notes.root', note);
+    handleChangeTrackParam('notes.octave', octave);
+    handleChangeTrackParam('notes.scaleType', scaleType);
+    handleChangeTrackParam('notes.scaleName', scaleName);
+    handleChangeTrackParam('notes.scale', scale);
     if (composition?.pattern) {
       composition.pattern.set({ values: scale });
     }
@@ -334,11 +336,15 @@ const App = memo(() => {
         </section>
         <section className='container-fluid'>
           <div className='row'>
-            <NotesModule onParamChange={handleChangeTrackParam} notes={notes} setCurrentScale={setCurrentScale} />
-            <CompositionModule onParamChange={handleChangeTrackParam} params={compositionParams} />
+            <CompositionModule
+              onParamChange={handleChangeTrackParam}
+              params={compositionParams}
+              setCurrentScale={setCurrentScale}
+            />
           </div>
         </section>
       </div>
+      <Track params={trackParams} trackId={trackId} />
     </div>
   );
 });

@@ -60,10 +60,10 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
         </option>
       </select>
 
-      <div className='container gx-0'>
+      <div className='container-fluid gx-0'>
         <div className='row'>
           <div className='col-auto'>
-            <h5 className='mt-3'>Envelope</h5>
+            <h3 className='mt-3'>Envelope</h3>
             <DraggableRangeInput
               label='Attack'
               min={0.005}
@@ -107,7 +107,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
             />
           </div>
           <div className='col-auto'>
-            <h5 className='mt-3'>Detune</h5>
+            <h3 className='mt-3'>Detune</h3>
             <DraggableRangeInput
               label='Amount'
               min={-50}
@@ -129,7 +129,7 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
               className='mb-2'
             />
 
-            <h5 className='mt-3'>Modulation</h5>
+            <h3 className='mt-3'>Modulation</h3>
             <DraggableRangeInput
               label='Amount'
               min={0}

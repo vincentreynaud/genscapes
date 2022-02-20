@@ -1,4 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&family=Raleway:wght@400;500&display=swap');
+
+$body-font-size: 0.8rem;
+$body-font-family: 'Fira Code', 'Courier New', Courier, monospace;
+$body-font-weight: 300;
+
+$base-bg: rgb(39, 39, 39);
+
 $mod-border: 1px solid rgb(149, 149, 149);
 $mod-border-radius: 8px;
 
 $base-body-color: white;
+
+$header-font-family: 'Raleway', 'Helvetica Neue', 'Arial', sans-serif;
