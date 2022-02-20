@@ -132,6 +132,7 @@ const App = memo(() => {
     console.log('init');
   }, []);
 
+  // update params state from url query
   useEffect(() => {
     const value = getParamsFromUrl();
     if (!isTracksStateType(value)) {
@@ -141,6 +142,7 @@ const App = memo(() => {
     }
   }, []);
 
+  // update url query on params change
   useEffect(() => {
     updateUrlQuery(tracksParams);
   }, [tracksParams]);
@@ -312,29 +314,31 @@ const App = memo(() => {
           <RangeInput label='' min={0} max={1} step={0.1} unit='' value={volume} onChange={handleChangeGlobalParam} />
         </div>
       </div>
-      <section className='container-fluid'>
-        <div className='row'>
-          <InstrumentModule onParamChange={handleChangeModuleParam} params={sourceParams as PolySynthParamsModule} />
-          {effectsParams.map((effect, i) => {
-            const Component = mapEffectNameToUiComponent[effect.name];
-            return (
-              <Component
-                params={effect}
-                onParamChange={handleChangeModuleParam}
-                onDelete={handleDeleteEffect}
-                key={i}
-              />
-            );
-          })}
-          <AddButton onAdd={handleAddEffect} />
-        </div>
-      </section>
-      <section className='container-fluid'>
-        <div className='row'>
-          <NotesModule onParamChange={handleChangeTrackParam} notes={notes} setCurrentScale={setCurrentScale} />
-          <CompositionModule onParamChange={handleChangeTrackParam} params={compositionParams} />
-        </div>
-      </section>
+      <div className='track-params-view'>
+        <section className='container-fluid'>
+          <div className='row'>
+            <InstrumentModule onParamChange={handleChangeModuleParam} params={sourceParams as PolySynthParamsModule} />
+            {effectsParams.map((effect, i) => {
+              const Component = mapEffectNameToUiComponent[effect.name];
+              return (
+                <Component
+                  params={effect}
+                  onParamChange={handleChangeModuleParam}
+                  onDelete={handleDeleteEffect}
+                  key={i}
+                />
+              );
+            })}
+            <AddButton onAdd={handleAddEffect} />
+          </div>
+        </section>
+        <section className='container-fluid'>
+          <div className='row'>
+            <NotesModule onParamChange={handleChangeTrackParam} notes={notes} setCurrentScale={setCurrentScale} />
+            <CompositionModule onParamChange={handleChangeTrackParam} params={compositionParams} />
+          </div>
+        </section>
+      </div>
     </div>
   );
 });

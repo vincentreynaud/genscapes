@@ -1,7 +1,9 @@
-import { random, round } from 'lodash';
 import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
 import { initialTrackId } from '../initialState';
 import { TracksState, TrackState } from '../types/params';
+import toString from 'lodash/toString';
+import random from 'lodash/random';
+import round from 'lodash/round';
 
 export const pickRandomElement = (arr: any[] = []) => arr[random(0, arr.length - 1)];
 
