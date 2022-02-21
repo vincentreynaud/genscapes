@@ -5,7 +5,7 @@ import { Scale } from '@tonaljs/tonal';
 import { nanoid } from '@reduxjs/toolkit';
 import find from 'lodash/find';
 
-import DraggableRangeInput from './shared/DraggableRangeInput';
+import SliderInput from './shared/SliderInput';
 import TrackSettings from './TrackSettings';
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
 import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam } from '../reducers/params';
@@ -253,7 +253,7 @@ export default function Track({ trackId }: Props) {
                   <div className='container-fluid p-0'>
                     <div className='row'>
                       <div className='col-auto'>
-                        <DraggableRangeInput
+                        <SliderInput
                           label='A'
                           min={polySynth.attack.min}
                           max={polySynth.attack.max}
@@ -263,7 +263,7 @@ export default function Track({ trackId }: Props) {
                           onChange={onModuleParamChange('options.options.envelope.attack')}
                           className='mb-2'
                         />
-                        <DraggableRangeInput
+                        <SliderInput
                           label='D'
                           min={polySynth.decay.min}
                           max={polySynth.decay.max}
@@ -275,7 +275,7 @@ export default function Track({ trackId }: Props) {
                         />
                       </div>
                       <div className='col-auto'>
-                        <DraggableRangeInput
+                        <SliderInput
                           label='S'
                           min={polySynth.sustain.min}
                           max={polySynth.sustain.max}
@@ -285,7 +285,7 @@ export default function Track({ trackId }: Props) {
                           onChange={onModuleParamChange('options.options.envelope.sustain')}
                           className='mb-2'
                         />
-                        <DraggableRangeInput
+                        <SliderInput
                           label='R'
                           min={polySynth.release.min}
                           max={polySynth.release.max}

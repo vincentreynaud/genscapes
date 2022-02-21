@@ -1,6 +1,6 @@
 import React from 'react';
 import ModuleWrapper from '../shared/ModuleWrapper';
-import DraggableRangeInput from '../shared/DraggableRangeInput';
+import SliderInput from '../shared/SliderInput';
 import { TrackCompositionState, UpdateTrackParamHelper } from '../../types/params';
 import { getNoteNames, getOctaves, getScaleTypes } from '../../lib/constants';
 
@@ -67,7 +67,7 @@ const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
               <h3>Timing</h3>
               <div className='row'>
                 <div className='col-auto'>
-                  <DraggableRangeInput
+                  <SliderInput
                     label='Note length'
                     min={0.2}
                     max={48}
@@ -77,7 +77,7 @@ const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
                     onChange={handleParamChange('noteLength')}
                     className='mb-2'
                   />
-                  <DraggableRangeInput
+                  <SliderInput
                     label='Rand.'
                     min={0}
                     max={1}
@@ -89,7 +89,7 @@ const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
                   />
                 </div>
                 <div className='col-auto'>
-                  <DraggableRangeInput
+                  <SliderInput
                     label='Interval'
                     min={0}
                     max={48}
@@ -99,7 +99,7 @@ const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
                     onChange={handleParamChange('interval')}
                     className='mb-2'
                   />
-                  <DraggableRangeInput
+                  <SliderInput
                     label='Rand.'
                     min={0}
                     max={1}

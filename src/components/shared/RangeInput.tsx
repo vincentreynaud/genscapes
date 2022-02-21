@@ -10,9 +10,10 @@ type Props = {
   unit: string;
   value: number;
   onChange?: (v: number) => void;
+  className?: string;
 };
 
-export default function RangeInput({ label, min, max, step, unit, value, onChange }: Props) {
+export default function RangeInput({ label, min, max, step, unit, value, onChange, className = '' }: Props) {
   const handleInput = (e: FormEvent<HTMLInputElement>) => {
     const v = toNumber(e.currentTarget.value);
     if (onChange) onChange(v);
@@ -24,12 +25,12 @@ export default function RangeInput({ label, min, max, step, unit, value, onChang
   }
 
   return (
-    <div>
+    <div className={className}>
       <label>{label}</label>
-      <div className='d-flex align-items-center'>
+      <div className='slider d-flex align-items-center'>
         <input
           type='range'
-          className='control'
+          className='slider-input'
           value={value}
           min={min}
           max={max}

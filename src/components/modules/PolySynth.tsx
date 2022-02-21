@@ -3,9 +3,10 @@ import toInteger from 'lodash/toInteger';
 import { EnvelopeOptions } from 'tone';
 import { SourceParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import ModuleWrapper from '../shared/ModuleWrapper';
-import DraggableRangeInput from '../shared/DraggableRangeInput';
+import SliderInput from '../shared/SliderInput';
 import { PARAMS_BOUNDARIES_MAP } from '../../lib/constants';
 import { toNumber } from 'lodash';
+import RangeInput from '../shared/RangeInput';
 
 type State = {
   onParamChange: UpdateModuleParamHelper;
@@ -29,31 +30,31 @@ const PolySynth = ({ onParamChange, params }: State) => {
 
   return (
     <ModuleWrapper id='source' title='Oscillator'>
-      <select
-        name='waveform'
-        id='waveform-select'
-        onChange={(e) => onParamChange(id!, 'options.oscillator.type', toInteger(e.target.value))}
-        value={options?.oscillator?.type || 'sine'}
-      >
-        <option value='sine' id='sine-wave'>
-          Sine
-        </option>
-        <option value='triangle' id='triangle-wave'>
-          Triangle
-        </option>
-        <option value='square' id='square-wave'>
-          Square
-        </option>
-        <option value='sawtooth' id='sawtooth-wave'>
-          Sawtooth
-        </option>
-      </select>
-
       <div className='container-fluid gx-0'>
         <div className='row'>
           <div className='col-auto'>
+            <h3 className='mt-0'>Wave</h3>
+            <select
+              name='waveform'
+              id='waveform-select'
+              onChange={(e) => onParamChange(id!, 'options.oscillator.type', toInteger(e.target.value))}
+              value={options?.oscillator?.type || 'sine'}
+            >
+              <option value='sine' id='sine-wave'>
+                Sine
+              </option>
+              <option value='triangle' id='triangle-wave'>
+                Triangle
+              </option>
+              <option value='square' id='square-wave'>
+                Square
+              </option>
+              <option value='sawtooth' id='sawtooth-wave'>
+                Sawtooth
+              </option>
+            </select>
             <h3 className='mt-3'>Envelope</h3>
-            <DraggableRangeInput
+            <SliderInput
               label='Attack'
               min={polySynth.attack.min}
               max={polySynth.attack.max}
@@ -63,7 +64,7 @@ const PolySynth = ({ onParamChange, params }: State) => {
               onChange={handleParamChange('options.options.envelope.attack')}
               className='mb-2'
             />
-            <DraggableRangeInput
+            <SliderInput
               label='Decay'
               min={polySynth.decay.min}
               max={polySynth.decay.max}
@@ -73,7 +74,7 @@ const PolySynth = ({ onParamChange, params }: State) => {
               onChange={handleParamChange('options.options.envelope.decay')}
               className='mb-2'
             />
-            <DraggableRangeInput
+            <SliderInput
               label='Sustain'
               min={polySynth.sustain.min}
               max={polySynth.sustain.max}
@@ -83,7 +84,7 @@ const PolySynth = ({ onParamChange, params }: State) => {
               onChange={handleParamChange('options.options.envelope.sustain')}
               className='mb-2'
             />
-            <DraggableRangeInput
+            <SliderInput
               label='Release'
               min={polySynth.release.min}
               max={polySynth.release.max}
@@ -95,8 +96,8 @@ const PolySynth = ({ onParamChange, params }: State) => {
             />
           </div>
           <div className='col-auto'>
-            <h3 className='mt-3'>Detune</h3>
-            <DraggableRangeInput
+            <h3 className='mt-0'>Detune</h3>
+            <SliderInput
               label='Amount'
               min={polySynth.detune.min}
               max={polySynth.detune.max}
@@ -106,8 +107,8 @@ const PolySynth = ({ onParamChange, params }: State) => {
               onChange={handleParamChange('options.options.detune')}
               className='mb-2'
             />
-            <DraggableRangeInput
-              label='Randomise'
+            <SliderInput
+              label='Rand.'
               min={polySynth.randDetune.min}
               max={polySynth.randDetune.max}
               step={polySynth.randDetune.step}
@@ -118,7 +119,7 @@ const PolySynth = ({ onParamChange, params }: State) => {
             />
 
             <h3 className='mt-3'>Modulation</h3>
-            <DraggableRangeInput
+            <SliderInput
               label='Amount'
               min={polySynth.modulationRate.min}
               max={polySynth.modulationRate.max}
@@ -128,7 +129,7 @@ const PolySynth = ({ onParamChange, params }: State) => {
               onChange={handleParamChange('tremoloOptions.amount')}
               className='mb-2'
             />
-            <DraggableRangeInput
+            <SliderInput
               label='Rate'
               min={polySynth.modulationRate.min}
               max={polySynth.modulationRate.max}
