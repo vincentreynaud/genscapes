@@ -30,7 +30,7 @@ export default function RangeInput({ label, min, max, step, unit, value, onChang
       <div className='slider d-flex align-items-center'>
         <input
           type='range'
-          className='slider-input'
+          className='form-range'
           value={value}
           min={min}
           max={max}
