@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import find from 'lodash/find';
 import set from 'lodash/set';
-import { initialParamsState } from '../initialState';
 import {
   UpdateTrackParamPayload,
   UpdateModuleParamPayload,
@@ -10,8 +9,9 @@ import {
   PolySynthParamsModule,
 } from '../types/params';
 import { KeyValuePair } from '../types/shared';
+import { getInitialParamsState } from '../initialState';
 
-let initialState = initialParamsState;
+let initialState = getInitialParamsState();
 
 const paramsSlice = createSlice({
   name: 'params',

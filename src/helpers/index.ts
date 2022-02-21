@@ -1,9 +1,9 @@
 import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
-import { initialTrackId } from '../initialState';
-import { TracksState, TrackState } from '../types/params';
 import toString from 'lodash/toString';
 import random from 'lodash/random';
 import round from 'lodash/round';
+import { initialTrackId } from '../initialState';
+import { EffectParamsModule, SourceParamsModule, TracksState, TrackState } from '../types/params';
 
 export const pickRandomElement = (arr: any[] = []) => arr[random(0, arr.length - 1)];
 
@@ -60,4 +60,8 @@ export function isTracksStateType(p: any): p is TracksState {
     return false;
   }
   return p[initialTrackId]?.notes?.root !== undefined && p[initialTrackId]?.composition?.noteLength !== undefined;
+}
+
+export function isSourceParamsModule(mod: SourceParamsModule | EffectParamsModule): mod is SourceParamsModule {
+  return (mod as SourceParamsModule)?.tremoloOptions !== undefined; // find if from instance instead
 }

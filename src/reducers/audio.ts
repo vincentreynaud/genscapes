@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Gain, Pattern, PolySynth, Synth } from 'tone';
+import { Gain, Pattern, PolySynth } from 'tone';
 import { AudioModule, AudioState } from '../types/audio';
-import { ModuleType } from '../types/params';
 import { KeyValuePair } from '../types/shared';
 
 const initialState = {

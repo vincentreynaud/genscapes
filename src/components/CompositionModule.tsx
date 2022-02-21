@@ -1,9 +1,8 @@
 import React from 'react';
-import { TrackCompositionState, UpdateTrackParamHelper } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
-import RangeInput from './RangeInput';
-import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from '../lib/constants';
 import DraggableRangeInput from './DraggableRangeInput';
+import { TrackCompositionState, UpdateTrackParamHelper } from '../types/params';
+import { getNoteNames, getOctaves, getScaleTypes } from '../lib/constants';
 
 type State = {
   onParamChange: UpdateTrackParamHelper;
@@ -29,7 +28,7 @@ const CompositionModule = ({ params, onParamChange, setCurrentScale }: State) =>
               value={notes.root}
               onChange={(e) => setCurrentScale(e.currentTarget.value, notes.octave, notes.scaleType)}
             >
-              {NOTE_NAMES.map((note, i) => (
+              {getNoteNames().map((note, i) => (
                 <option value={note} key={i}>
                   {note}
                 </option>
@@ -41,7 +40,7 @@ const CompositionModule = ({ params, onParamChange, setCurrentScale }: State) =>
               value={notes.octave}
               onChange={(e) => setCurrentScale(notes.root, e.currentTarget.value, notes.scaleType)}
             >
-              {OCTAVES.map((octave) => (
+              {getOctaves().map((octave) => (
                 <option value={octave.toString()} key={octave}>
                   {octave}
                 </option>
@@ -53,7 +52,7 @@ const CompositionModule = ({ params, onParamChange, setCurrentScale }: State) =>
               value={notes.scaleType}
               onChange={(e) => setCurrentScale(notes.root, notes.octave, e.currentTarget.value)}
             >
-              {SCALE_TYPES.map((scale, i) => (
+              {getScaleTypes().map((scale, i) => (
                 <option value={scale} key={i}>
                   {scale}
                 </option>

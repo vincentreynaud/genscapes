@@ -4,11 +4,15 @@ import { EnvelopeOptions } from 'tone';
 import { SourceParamsModule, UpdateModuleParamHelper } from '../types/params';
 import ModuleWrapper from './ModuleWrapper';
 import DraggableRangeInput from './DraggableRangeInput';
+import { PARAMS_BOUNDARIES_MAP } from '../lib/constants';
+import { toNumber } from 'lodash';
 
 type State = {
   onParamChange: UpdateModuleParamHelper;
   params: SourceParamsModule;
 };
+
+const { polySynth } = PARAMS_BOUNDARIES_MAP;
 
 const InstrumentModule = ({ onParamChange, params }: State) => {
   const {
@@ -19,24 +23,9 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
     tremoloOptions,
   } = params;
 
-  const handleEnvelopeChange = (param: keyof EnvelopeOptions) => (v: number) => {
-    const value = { ...options?.envelope, [param]: v };
-    onParamChange(id!, 'options.options.envelope', value);
+  const handleParamChange = (path: string) => (v: number) => {
+    onParamChange(id!, path, toNumber(v));
   };
-
-  const handleDetuneChange = (type: 'amount' | 'rand') => (v: number) => {
-    if (type === 'amount') {
-      onParamChange(id!, 'options.options.detune', v);
-    } else {
-      onParamChange(id!, 'rand.detune', v);
-    }
-  };
-
-  const handleModulationChange = (param: 'rate' | 'amount') => (v: number) => {
-    onParamChange(id!, `tremoloOptions.${param}`, v);
-  };
-
-  // min, max & step props of the RangeInput components should be all declared in a constants file
 
   return (
     <ModuleWrapper id='source' title='Oscillator'>
@@ -66,43 +55,42 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
             <h3 className='mt-3'>Envelope</h3>
             <DraggableRangeInput
               label='Attack'
-              min={0.005}
-              max={15}
-              step={0.001}
-              unit='s'
+              min={polySynth.attack.min}
+              max={polySynth.attack.max}
+              step={polySynth.attack.step}
+              unit={polySynth.attack.unit}
               value={(options?.envelope?.attack as number) || 0.005}
-              onChange={handleEnvelopeChange('attack')}
+              onChange={handleParamChange('options.options.envelope.attack')}
               className='mb-2'
             />
-
             <DraggableRangeInput
               label='Decay'
-              min={0.005}
-              max={15}
-              step={0.001}
-              unit='s'
+              min={polySynth.decay.min}
+              max={polySynth.decay.max}
+              step={polySynth.decay.step}
+              unit={polySynth.decay.unit}
               value={(options?.envelope?.decay as number) || 0.005}
-              onChange={handleEnvelopeChange('decay')}
+              onChange={handleParamChange('options.options.envelope.decay')}
               className='mb-2'
             />
             <DraggableRangeInput
               label='Sustain'
-              min={0}
-              max={1}
-              step={0.01}
-              unit='%'
+              min={polySynth.sustain.min}
+              max={polySynth.sustain.max}
+              step={polySynth.sustain.step}
+              unit={polySynth.sustain.unit}
               value={(options?.envelope?.sustain as number) || 0}
-              onChange={handleEnvelopeChange('sustain')}
+              onChange={handleParamChange('options.options.envelope.sustain')}
               className='mb-2'
             />
             <DraggableRangeInput
               label='Release'
-              min={0.005}
-              max={15}
-              step={0.001}
-              unit='s'
+              min={polySynth.release.min}
+              max={polySynth.release.max}
+              step={polySynth.release.step}
+              unit={polySynth.release.unit}
               value={(options?.envelope?.release as number) || 1}
-              onChange={handleEnvelopeChange('release')}
+              onChange={handleParamChange('options.options.envelope.release')}
               className='mb-2'
             />
           </div>
@@ -110,44 +98,44 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
             <h3 className='mt-3'>Detune</h3>
             <DraggableRangeInput
               label='Amount'
-              min={-50}
-              max={50}
-              step={1}
-              unit='ct'
+              min={polySynth.detune.min}
+              max={polySynth.detune.max}
+              step={polySynth.detune.step}
+              unit={polySynth.detune.unit}
               value={options?.detune || 0}
-              onChange={handleDetuneChange('amount')}
+              onChange={handleParamChange('options.options.detune')}
               className='mb-2'
             />
             <DraggableRangeInput
               label='Randomise'
-              min={0}
-              max={1}
-              step={0.01}
-              unit='%'
+              min={polySynth.randDetune.min}
+              max={polySynth.randDetune.max}
+              step={polySynth.randDetune.step}
+              unit={polySynth.randDetune.unit}
               value={rand?.detune || 0}
-              onChange={handleDetuneChange('rand')}
+              onChange={handleParamChange('rand.detune')}
               className='mb-2'
             />
 
             <h3 className='mt-3'>Modulation</h3>
             <DraggableRangeInput
               label='Amount'
-              min={0}
-              max={1}
-              step={0.01}
-              unit='%'
+              min={polySynth.modulationRate.min}
+              max={polySynth.modulationRate.max}
+              step={polySynth.modulationRate.step}
+              unit={polySynth.modulationRate.unit}
               value={tremoloOptions.amount}
-              onChange={handleModulationChange('amount')}
+              onChange={handleParamChange('tremoloOptions.amount')}
               className='mb-2'
             />
             <DraggableRangeInput
               label='Rate'
-              min={1}
-              max={60}
-              step={0.01}
-              unit='Hz'
+              min={polySynth.modulationRate.min}
+              max={polySynth.modulationRate.max}
+              step={polySynth.modulationRate.step}
+              unit={polySynth.modulationRate.unit}
               value={tremoloOptions.rate}
-              onChange={handleModulationChange('rate')}
+              onChange={handleParamChange('tremoloOptions.rate')}
               className='mb-2'
             />
           </div>

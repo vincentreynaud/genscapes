@@ -1,83 +1,88 @@
 import { nanoid } from '@reduxjs/toolkit';
 import { Scale } from '@tonaljs/tonal';
 import { Synth } from 'tone';
-import { NOTE_NAMES, OCTAVES, SCALE_TYPES } from './lib/constants';
+import { getNoteNames, getOctaves, getScaleTypes } from './lib/constants';
 import { AutoFilterParamsModule, EffectParamsModule, SourceParamsModule, TrackState } from './types/params';
 import { pickRandomElement } from './helpers';
 
-const root = pickRandomElement(NOTE_NAMES);
-const octave = pickRandomElement(OCTAVES).toString();
-const scaleType = pickRandomElement(SCALE_TYPES);
-const scaleName = `${root}${octave} ${scaleType}`;
-const scale = Scale.get(scaleName).notes;
-
 export const initialTrackId: number = 0;
 
-export const initialSourceState: SourceParamsModule = {
-  name: 'polySynth',
-  type: 'source',
-  id: nanoid(),
-  options: {
-    voice: Synth,
-    maxPolyphony: 8,
+export function initNotes() {
+  const root = pickRandomElement(getNoteNames());
+  const octave = pickRandomElement(getOctaves()).toString();
+  const scaleType = pickRandomElement(getScaleTypes());
+  const scaleName = `${root}${octave} ${scaleType}`;
+  const scale = Scale.get(scaleName).notes;
+  return { root, octave, scaleType, scaleName, scale };
+}
+
+export function getInitialSourceState(): SourceParamsModule {
+  return {
+    name: 'polySynth',
+    type: 'source',
+    id: nanoid(),
     options: {
-      volume: -12,
-      detune: 2,
-      oscillator: { type: 'sine' },
-      envelope: {
-        attack: 5.5,
-        decay: 4,
-        sustain: 0.8,
-        release: 8,
+      voice: Synth,
+      maxPolyphony: 8,
+      options: {
+        volume: -12,
+        detune: 2,
+        oscillator: { type: 'sine' },
+        envelope: {
+          attack: 5.5,
+          decay: 4,
+          sustain: 0.8,
+          release: 8,
+        },
       },
     },
-  },
-  rand: {
-    detune: 0,
-  },
-  tremoloOptions: {
-    amount: 1,
-    rate: 30,
-  },
-};
-
-export const initialTrackState: TrackState = {
-  signalChain: [initialSourceState],
-  composition: {
-    notes: {
-      root,
-      octave,
-      scaleType,
-      scaleName,
-      scale,
+    rand: {
+      detune: 0,
     },
-    noteLength: 10,
-    randomiseNoteLength: 0.8,
-    interval: 8,
-    randomiseInterval: 0.8,
-  },
-};
+    tremoloOptions: {
+      amount: 1,
+      rate: 30,
+    },
+  };
+}
 
-export const initialParamsState = {
-  global: {
-    playing: false,
-    volume: 0.5,
-  },
-  tracks: {
-    [initialTrackId]: initialTrackState,
-  },
-};
+export function getInitialTrackState(): TrackState {
+  return {
+    signalChain: [getInitialSourceState()],
+    composition: {
+      notes: initNotes(),
+      noteLength: 10,
+      randomiseNoteLength: 0.8,
+      interval: 8,
+      randomiseInterval: 0.8,
+    },
+  };
+}
 
-export const initialAutoFilterState: AutoFilterParamsModule = {
-  name: 'autoFilter',
-  type: 'effect',
-  options: {
-    type: 'sine',
-    frequency: 30,
-    depth: 1,
-    filter: { Q: 1, type: 'lowpass', rolloff: -12 },
-  },
-};
+export function getInitialParamsState() {
+  return {
+    global: {
+      playing: false,
+      volume: 0.5,
+    },
+    tracks: {
+      [initialTrackId]: getInitialTrackState(),
+    },
+  };
+}
+
+export function getInitialAutoFilterState(): AutoFilterParamsModule {
+  return {
+    name: 'autoFilter',
+    type: 'effect',
+    options: {
+      type: 'sine',
+      frequency: 30,
+      depth: 1,
+      filter: { Q: 1, type: 'lowpass', rolloff: -12 },
+    },
+  };
+}
 
 export const initialReverbState: EffectParamsModule = {
   name: 'reverb',
