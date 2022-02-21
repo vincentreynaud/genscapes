@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import toInteger from 'lodash/toInteger';
 import { EnvelopeOptions } from 'tone';
 import { SourceParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import ModuleWrapper from '../shared/ModuleWrapper';
 import SliderInput from '../shared/SliderInput';
-import { PARAMS_BOUNDARIES_MAP } from '../../lib/constants';
+import { getParamsBoundaries } from '../../lib/constants';
 import { toNumber } from 'lodash';
 import RangeInput from '../shared/RangeInput';
 
@@ -13,9 +13,8 @@ type State = {
   params: SourceParamsModule;
 };
 
-const { polySynth } = PARAMS_BOUNDARIES_MAP;
-
 const PolySynth = ({ onParamChange, params }: State) => {
+  const { polySynth } = useMemo(() => getParamsBoundaries(), []);
   const {
     name,
     id,
@@ -121,10 +120,10 @@ const PolySynth = ({ onParamChange, params }: State) => {
             <h3 className='mt-3'>Modulation</h3>
             <SliderInput
               label='Amount'
-              min={polySynth.modulationRate.min}
-              max={polySynth.modulationRate.max}
-              step={polySynth.modulationRate.step}
-              unit={polySynth.modulationRate.unit}
+              min={polySynth.modulationAmount.min}
+              max={polySynth.modulationAmount.max}
+              step={polySynth.modulationAmount.step}
+              unit={polySynth.modulationAmount.unit}
               value={tremoloOptions.amount}
               onChange={handleParamChange('tremoloOptions.amount')}
               className='mb-2'

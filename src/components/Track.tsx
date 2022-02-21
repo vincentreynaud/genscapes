@@ -4,8 +4,8 @@ import { Pattern, PolySynth, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import { nanoid } from '@reduxjs/toolkit';
 import find from 'lodash/find';
+import VscSettings from '@react-icons/all-files/vsc/VscSettings';
 
-import SliderInput from './shared/SliderInput';
 import TrackSettings from './TrackSettings';
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
 import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam } from '../reducers/params';
@@ -31,16 +31,14 @@ import { EffectName, TrackState, UpdateModuleParamHelper, UpdateTrackParamHelper
 import {
   mapEffectNameToInitialState,
   mapEffectNameToToneComponent,
-  MODULES_DISPLAY_NAMES_MAP,
-  PARAMS_BOUNDARIES_MAP,
+  mapEffectNameToUiMinComponent,
 } from '../lib/constants';
 import '../styles/index.scss';
+import PolySynthUiMin from './modules/PolySynthUiMin';
 
 type Props = {
   trackId: number;
 };
-
-const { polySynth } = PARAMS_BOUNDARIES_MAP;
 
 export default function Track({ trackId }: Props) {
   const dispatch = useAppDispatch();
@@ -52,15 +50,15 @@ export default function Track({ trackId }: Props) {
   const selectTrackParams = useMemo(() => makeSelectTrackParams(trackId), [trackId]);
   const selectTrackAudio = useMemo(() => makeSelectTrackAudio(trackId), [trackId]);
   const globalParams = useAppSelector(selectGlobalParams);
-  const trackParams = useAppSelector((state) => selectTrackParams(state));
-  const globalAudio = useAppSelector((state) => selectGlobalAudio(state));
-  const trackAudio = useAppSelector((state) => selectTrackAudio(state));
-  const [sourceParams] = useAppSelector((state) => selectSourceParams(state));
-  const effectsParams = useAppSelector((state) => selectEffectsParams(state));
-  const [sourceNode] = useAppSelector((state) => selectSourceNodes(state));
-  const effectAudioModules = useAppSelector((state) => selectEffectAudioModules(state));
-  const effectNodes = useAppSelector((state) => selectEffectNodes(state));
-  const { composition: compositionParams } = trackParams;
+  const trackParams = useAppSelector(selectTrackParams);
+  const globalAudio = useAppSelector(selectGlobalAudio);
+  const trackAudio = useAppSelector(selectTrackAudio);
+  const [sourceParams] = useAppSelector(selectSourceParams);
+  const effectsParams = useAppSelector(selectEffectsParams);
+  const [sourceNode] = useAppSelector(selectSourceNodes);
+  const effectAudioModules = useAppSelector(selectEffectAudioModules);
+  const effectNodes = useAppSelector(selectEffectNodes);
+  const { signalChain: signalChainParams, composition: compositionParams } = trackParams;
   const { notes } = compositionParams;
   const { scale } = notes;
   const { signalChain, composition } = trackAudio;
@@ -114,10 +112,6 @@ export default function Track({ trackId }: Props) {
   // useCallback will be necessary when the tracks change
   const handleChangeModuleParam: UpdateModuleParamHelper = (modId, path, value) => {
     dispatch(updateModuleParam({ trackId, modId, path, value }));
-  };
-
-  const onModuleParamChange = (path: string) => (v: number) => {
-    handleChangeModuleParam(signalChain[0].id!, path, v);
   };
 
   // Update tone nodes on module param changes
@@ -245,61 +239,12 @@ export default function Track({ trackId }: Props) {
     <>
       <div id={`track-${trackId}`} className='container-fluid'>
         <div className='row'>
-          {signalChain.map((mod, i) => {
-            if (mod.type === 'source') {
-              return (
-                <div className='col' key={i}>
-                  <h4>{MODULES_DISPLAY_NAMES_MAP[mod.name]}</h4>
-                  <div className='container-fluid p-0'>
-                    <div className='row'>
-                      <div className='col-auto'>
-                        <SliderInput
-                          label='A'
-                          min={polySynth.attack.min}
-                          max={polySynth.attack.max}
-                          step={polySynth.attack.step}
-                          unit={polySynth.attack.unit}
-                          value={attack}
-                          onChange={onModuleParamChange('options.options.envelope.attack')}
-                          className='mb-2'
-                        />
-                        <SliderInput
-                          label='D'
-                          min={polySynth.decay.min}
-                          max={polySynth.decay.max}
-                          step={polySynth.decay.step}
-                          unit={polySynth.decay.unit}
-                          value={decay}
-                          onChange={onModuleParamChange('options.options.envelope.decay')}
-                          className='mb-2'
-                        />
-                      </div>
-                      <div className='col-auto'>
-                        <SliderInput
-                          label='S'
-                          min={polySynth.sustain.min}
-                          max={polySynth.sustain.max}
-                          step={polySynth.sustain.step}
-                          unit={polySynth.sustain.unit}
-                          value={sustain}
-                          onChange={onModuleParamChange('options.options.envelope.sustain')}
-                          className='mb-2'
-                        />
-                        <SliderInput
-                          label='R'
-                          min={polySynth.release.min}
-                          max={polySynth.release.max}
-                          step={polySynth.release.step}
-                          unit={polySynth.release.unit}
-                          value={release}
-                          onChange={onModuleParamChange('options.options.envelope.release')}
-                          className='mb-2'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
+          {signalChainParams.map((mod, i) => {
+            if (isSourceParamsModule(mod)) {
+              return <PolySynthUiMin key={i} mod={mod} onParamChange={handleChangeModuleParam} />;
+            } else {
+              const Component = mapEffectNameToUiMinComponent()[mod.name];
+              return <Component key={i} onParamChange={handleChangeModuleParam} mod={mod} />;
             }
           })}
         </div>

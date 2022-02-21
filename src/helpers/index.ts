@@ -63,5 +63,5 @@ export function isTracksStateType(p: any): p is TracksState {
 }
 
 export function isSourceParamsModule(mod: SourceParamsModule | EffectParamsModule): mod is SourceParamsModule {
-  return (mod as SourceParamsModule)?.tremoloOptions !== undefined; // find if from instance instead
+  return (mod as SourceParamsModule)?.type === 'source' && (mod as SourceParamsModule)?.tremoloOptions !== undefined;
 }

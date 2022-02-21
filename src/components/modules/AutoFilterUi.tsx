@@ -1,17 +1,19 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useMemo } from 'react';
 import { toInteger } from 'lodash';
-import { AutoFilterOptions } from 'tone';
+import { getParamsBoundaries, MODULES_DISPLAY_NAMES_MAP } from '../../lib/constants';
 import { AutoFilterParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import ModuleWrapper from '../shared/ModuleWrapper';
 import RangeInput from '../shared/RangeInput';
+import SliderInput from '../shared/SliderInput';
 
-type State = {
+type Props = {
   params: AutoFilterParamsModule; // AutoFilterOptions
   onParamChange: UpdateModuleParamHelper;
   onDelete: any;
 };
 
-const AutoFilter = ({ onParamChange, params, onDelete }: State) => {
+export default function AutoFilterUi({ onParamChange, params, onDelete }: Props) {
+  const { autoFilter } = useMemo(() => getParamsBoundaries(), []);
   const {
     id,
     name,
@@ -25,18 +27,17 @@ const AutoFilter = ({ onParamChange, params, onDelete }: State) => {
       console.error(`module id is ${id}`);
     }
   };
-
-  const handleParamChange =
-    (param: keyof AutoFilterOptions, paramGroup = '') =>
-    (value: number) => {
-      onParamChange(id!, `options${paramGroup ? '.' + paramGroup : ''}.${param}`, value);
-    };
-
-  // min, max & step props of the RangeInput components should be all declared in a constants file
+  const handleParamChange = (path: string) => (v: number) => {
+    if (id) {
+      onParamChange(id, path, v);
+    } else {
+      console.error(`module id is ${id}`);
+    }
+  };
 
   return (
-    <ModuleWrapper id={name} title='Auto Filter'>
-      <select name='filter-type' id='filter-type-select' onChange={handleSelectChange} value={type}>
+    <ModuleWrapper id={name} title={MODULES_DISPLAY_NAMES_MAP[name]}>
+      <select name='filter-type' id='filter-type-select' className='mb-2' onChange={handleSelectChange} value={type}>
         <option value='lowpass' id='lowpass-filter-select-option'>
           Lowpass
         </option>
@@ -62,27 +63,26 @@ const AutoFilter = ({ onParamChange, params, onDelete }: State) => {
           Peaking
         </option>
       </select>
-
-      <RangeInput
-        label='Frequency'
-        min={1}
-        max={60}
-        step={0.01}
-        unit='Hz'
+      <SliderInput
+        label='Freq.'
+        min={autoFilter.frequency.min}
+        max={autoFilter.frequency.max}
+        step={autoFilter.frequency.step}
+        unit={autoFilter.frequency.unit}
         value={toInteger(frequency)}
-        onChange={handleParamChange('frequency')}
+        onChange={handleParamChange('options.frequency')}
+        className='mb-2'
       />
-      <RangeInput
+      <SliderInput
         label='Amount'
-        min={0}
-        max={1}
-        step={0.0001}
-        unit='%'
+        min={autoFilter.depth.min}
+        max={autoFilter.depth.max}
+        step={autoFilter.depth.step}
+        unit={autoFilter.depth.unit}
         value={toInteger(depth)}
-        onChange={handleParamChange('depth')}
+        onChange={handleParamChange('options.depth')}
+        className='mb-2'
       />
     </ModuleWrapper>
   );
-};
-
-export default AutoFilter;
+}
