@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as Tone from 'tone';
 import { Pattern, PolySynth, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import { nanoid } from '@reduxjs/toolkit';
 import find from 'lodash/find';
-import VscSettings from '@react-icons/all-files/vsc/VscSettings';
+import { VscSettings } from '@react-icons/all-files/vsc/VscSettings.esm';
+import { RiVolumeDownFill } from '@react-icons/all-files/ri/RiVolumeDownFill.esm';
+import { IoMdClose } from '@react-icons/all-files/io/IoMdClose.esm';
 
 import TrackSettings from './TrackSettings';
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
@@ -29,12 +31,16 @@ import {
 } from '../helpers';
 import { EffectName, TrackState, UpdateModuleParamHelper, UpdateTrackParamHelper } from '../types/params';
 import {
+  getTrackParamsBoundaries,
   mapEffectNameToInitialState,
   mapEffectNameToToneComponent,
   mapEffectNameToUiMinComponent,
 } from '../lib/constants';
 import '../styles/index.scss';
 import PolySynthUiMin from './modules/PolySynthUiMin';
+import SliderInput from './shared/SliderInput';
+import { toInteger } from 'lodash';
+import IconButton from './shared/IconButton';
 
 type Props = {
   trackId: number;
@@ -49,6 +55,7 @@ export default function Track({ trackId }: Props) {
   const selectEffectAudioModules = useMemo(() => makeSelectAudioModuleByType(trackId, 'effect'), [trackId]);
   const selectTrackParams = useMemo(() => makeSelectTrackParams(trackId), [trackId]);
   const selectTrackAudio = useMemo(() => makeSelectTrackAudio(trackId), [trackId]);
+  const { global: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
   const globalParams = useAppSelector(selectGlobalParams);
   const trackParams = useAppSelector(selectTrackParams);
   const globalAudio = useAppSelector(selectGlobalAudio);
@@ -235,6 +242,8 @@ export default function Track({ trackId }: Props) {
 
   const handleDeleteEffect = (effectName: string) => {};
 
+  const [trackVolume, setTrackVolume] = useState(0.5);
+
   return (
     <>
       <div id={`track-${trackId}`} className='container-fluid'>
@@ -247,6 +256,33 @@ export default function Track({ trackId }: Props) {
               return <Component key={i} onParamChange={handleChangeModuleParam} mod={mod} />;
             }
           })}
+        </div>
+        <div className='top-settings'>
+          <div className='container-fluid p-0'>
+            <div className='row gx-2 align-items-center'>
+              <div className='col-auto me-1'>
+                <SliderInput
+                  label={<RiVolumeDownFill />}
+                  min={boundaries.volume.min}
+                  max={boundaries.volume.max}
+                  step={boundaries.volume.step}
+                  unit={boundaries.volume.unit}
+                  value={toInteger(trackVolume)}
+                  onChange={setTrackVolume}
+                />
+              </div>
+              <div className='col-auto'>
+                <IconButton>
+                  <VscSettings />
+                </IconButton>
+              </div>
+              <div className='col-auto'>
+                <IconButton>
+                  <IoMdClose />
+                </IconButton>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <TrackSettings

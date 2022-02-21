@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useMemo } from 'react';
 import { toInteger } from 'lodash';
-import { getParamsBoundaries, MODULES_DISPLAY_NAMES_MAP } from '../../lib/constants';
+import { getTrackParamsBoundaries, MODULES_DISPLAY_NAMES_MAP } from '../../lib/constants';
 import { AutoFilterParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import ModuleWrapper from '../shared/ModuleWrapper';
 import RangeInput from '../shared/RangeInput';
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export default function AutoFilterUi({ onParamChange, params, onDelete }: Props) {
-  const { autoFilter } = useMemo(() => getParamsBoundaries(), []);
+  const { autoFilter } = useMemo(() => getTrackParamsBoundaries(), []);
   const {
     id,
     name,

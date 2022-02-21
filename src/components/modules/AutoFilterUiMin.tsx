@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import SliderInput from '../shared/SliderInput';
-import { MODULES_DISPLAY_NAMES_MAP, getParamsBoundaries } from '../../lib/constants';
+import { MODULES_DISPLAY_NAMES_MAP, getTrackParamsBoundaries } from '../../lib/constants';
 import { AutoFilterParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import toInteger from 'lodash/toInteger';
 
@@ -11,7 +11,7 @@ type Props = {
 
 export default function AutoFilterUiMin({ onParamChange, mod }: Props) {
   const { frequency, depth } = mod?.options;
-  const { autoFilter: boundaries } = useMemo(() => getParamsBoundaries(), []);
+  const { autoFilter: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
 
   const handleParamChange = (path: string) => (v: number) => {
     if (mod.id) {

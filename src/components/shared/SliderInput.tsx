@@ -1,12 +1,13 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, ReactNode, useState } from 'react';
 import round from 'lodash/round';
 import toNumber from 'lodash/toNumber';
 import add from 'lodash/add';
 import ceil from 'lodash/ceil';
 import { Progress } from 'reactstrap';
+import classNames from 'classnames';
 
 type Props = {
-  label: string;
+  label: string | ReactNode;
   min: number;
   max: number;
   step?: number;
@@ -51,7 +52,7 @@ export default function SliderInput({
   return (
     <div className={`${className} slider d-flex align-items-center`}>
       <div className='col'>
-        <label className='me-2'>{label}</label>
+        <label className={classNames('me-2', { 'icon-label': typeof label !== 'string' })}>{label}</label>
       </div>
       <div className='col-auto'>
         <div className='wrapper' style={{ width: sliderWidth }}>
@@ -65,7 +66,7 @@ export default function SliderInput({
             onChange={handleInput}
           />
           <span className='slider-value'>{formatValue(value, unit)}</span>
-          <Progress className='slider-progress' value={(value * 100) / (max - min)} />
+          <Progress className='slider-progress' color='primary' value={(value * 100) / (max - min)} />
         </div>
       </div>
     </div>

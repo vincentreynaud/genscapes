@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MODULES_DISPLAY_NAMES_MAP, getParamsBoundaries } from '../../lib/constants';
+import { MODULES_DISPLAY_NAMES_MAP, getTrackParamsBoundaries } from '../../lib/constants';
 import { PolySynthParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import SliderInput from '../shared/SliderInput';
 
@@ -9,7 +9,7 @@ type Props = {
 };
 
 export default function PolySynthUiMin({ onParamChange, mod }: Props) {
-  const { polySynth } = useMemo(() => getParamsBoundaries(), []);
+  const { polySynth } = useMemo(() => getTrackParamsBoundaries(), []);
   const { attack, decay, sustain, release } = mod?.options?.options?.envelope as any;
 
   const handleParamChange = (path: string) => (v: number) => {

@@ -9,6 +9,9 @@ import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
 import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers';
 import '../styles/index.scss';
+import { RiPlayFill } from '@react-icons/all-files/ri/RiPlayFill.esm';
+import { RiStopFill } from '@react-icons/all-files/ri/RiStopFill.esm';
+import IconButton from './shared/IconButton';
 
 const App = memo(() => {
   const dispatch = useAppDispatch();
@@ -65,9 +68,9 @@ const App = memo(() => {
   return (
     <div className='content'>
       <div id='main-controls'>
-        <button id='play-button' className='btn btn-dark' onClick={togglePlay}>
-          {playing ? 'Stop' : 'Start'}
-        </button>
+        <IconButton id='play-button' onClick={togglePlay}>
+          {playing ? <RiStopFill /> : <RiPlayFill />}
+        </IconButton>
         <div id='volume'>
           <RangeInput label='' min={0} max={1} step={0.1} unit='' value={volume} onChange={handleChangeGlobalParam} />
         </div>

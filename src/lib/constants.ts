@@ -30,8 +30,16 @@ export const MODULES_DISPLAY_NAMES_MAP = {
   autoFilter: 'Auto Filter',
 };
 
-export function getParamsBoundaries() {
+export function getTrackParamsBoundaries() {
   return {
+    global: {
+      volume: {
+        min: 0,
+        max: 1,
+        step: 0.01,
+        unit: '',
+      },
+    },
     autoFilter: {
       frequency: {
         min: 1,

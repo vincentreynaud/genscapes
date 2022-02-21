@@ -4,7 +4,7 @@ import { EnvelopeOptions } from 'tone';
 import { SourceParamsModule, UpdateModuleParamHelper } from '../../types/params';
 import ModuleWrapper from '../shared/ModuleWrapper';
 import SliderInput from '../shared/SliderInput';
-import { getParamsBoundaries } from '../../lib/constants';
+import { getTrackParamsBoundaries } from '../../lib/constants';
 import { toNumber } from 'lodash';
 import RangeInput from '../shared/RangeInput';
 
@@ -14,7 +14,7 @@ type State = {
 };
 
 const PolySynth = ({ onParamChange, params }: State) => {
-  const { polySynth } = useMemo(() => getParamsBoundaries(), []);
+  const { polySynth } = useMemo(() => getTrackParamsBoundaries(), []);
   const {
     name,
     id,
