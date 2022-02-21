@@ -7,6 +7,7 @@ body {
   font-family: $body-font-family !important;
   font-weight: $body-font-weight !important;
   font-size: $body-font-size !important;
+  margin: 0 !important;
 }
 
 h1,
@@ -47,7 +48,6 @@ select {
 }
 
 .content {
-  margin: 0.5rem;
   height: 100vw;
   position: relative;
 }
@@ -123,4 +123,9 @@ span.control-value {
   top: 50%;
   right: 4rem;
   transform: translateY(-50%);
+}
+
+div[id^='track'] {
+  padding: map-get($spacers, 2);
+  background: rgba($white, 0.1);
 }

@@ -1,8 +1,8 @@
 import React from 'react';
-import ModuleWrapper from './ModuleWrapper';
-import DraggableRangeInput from './DraggableRangeInput';
-import { TrackCompositionState, UpdateTrackParamHelper } from '../types/params';
-import { getNoteNames, getOctaves, getScaleTypes } from '../lib/constants';
+import ModuleWrapper from '../shared/ModuleWrapper';
+import DraggableRangeInput from '../shared/DraggableRangeInput';
+import { TrackCompositionState, UpdateTrackParamHelper } from '../../types/params';
+import { getNoteNames, getOctaves, getScaleTypes } from '../../lib/constants';
 
 type State = {
   onParamChange: UpdateTrackParamHelper;
@@ -10,7 +10,7 @@ type State = {
   setCurrentScale: any;
 };
 
-const CompositionModule = ({ params, onParamChange, setCurrentScale }: State) => {
+const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
   const { notes } = params;
   const handleParamChange = (param) => (value: number) => {
     onParamChange(param, value);
@@ -119,4 +119,4 @@ const CompositionModule = ({ params, onParamChange, setCurrentScale }: State) =>
   );
 };
 
-export default CompositionModule;
+export default Composition;

@@ -1,9 +1,9 @@
 import React, { ChangeEvent } from 'react';
 import { toInteger } from 'lodash';
 import { AutoFilterOptions } from 'tone';
-import { AutoFilterParamsModule, UpdateModuleParamHelper } from '../types/params';
-import ModuleWrapper from './ModuleWrapper';
-import RangeInput from './RangeInput';
+import { AutoFilterParamsModule, UpdateModuleParamHelper } from '../../types/params';
+import ModuleWrapper from '../shared/ModuleWrapper';
+import RangeInput from '../shared/RangeInput';
 
 type State = {
   params: AutoFilterParamsModule; // AutoFilterOptions
@@ -11,7 +11,7 @@ type State = {
   onDelete: any;
 };
 
-const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
+const AutoFilter = ({ onParamChange, params, onDelete }: State) => {
   const {
     id,
     name,
@@ -85,4 +85,4 @@ const AutoFilterModule = ({ onParamChange, params, onDelete }: State) => {
   );
 };
 
-export default AutoFilterModule;
+export default AutoFilter;

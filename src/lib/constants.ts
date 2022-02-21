@@ -2,7 +2,7 @@ import range from 'lodash/range';
 import { AutoFilter, Delay, Reverb } from 'tone';
 import { Note, Scale } from '@tonaljs/tonal';
 import { getInitialAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
-import AutoFilterModule from '../components/AutoFilterModule';
+import AutoFilterModule from '../components/modules/AutoFilter';
 import { ToneAudioEffect } from '../types/audio';
 import { EffectName, EffectParamsModule } from '../types/params';
 

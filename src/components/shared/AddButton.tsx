@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { EFFECT_IDS, EFFECT_NAMES_MAP } from '../lib/constants';
+import { EFFECT_IDS, EFFECT_NAMES_MAP } from '../../lib/constants';
 import ModuleWrapper from './ModuleWrapper';
 
 type State = {

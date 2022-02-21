@@ -1,10 +1,10 @@
 import React from 'react';
 import toInteger from 'lodash/toInteger';
 import { EnvelopeOptions } from 'tone';
-import { SourceParamsModule, UpdateModuleParamHelper } from '../types/params';
-import ModuleWrapper from './ModuleWrapper';
-import DraggableRangeInput from './DraggableRangeInput';
-import { PARAMS_BOUNDARIES_MAP } from '../lib/constants';
+import { SourceParamsModule, UpdateModuleParamHelper } from '../../types/params';
+import ModuleWrapper from '../shared/ModuleWrapper';
+import DraggableRangeInput from '../shared/DraggableRangeInput';
+import { PARAMS_BOUNDARIES_MAP } from '../../lib/constants';
 import { toNumber } from 'lodash';
 
 type State = {
@@ -14,7 +14,7 @@ type State = {
 
 const { polySynth } = PARAMS_BOUNDARIES_MAP;
 
-const InstrumentModule = ({ onParamChange, params }: State) => {
+const PolySynth = ({ onParamChange, params }: State) => {
   const {
     name,
     id,
@@ -145,4 +145,4 @@ const InstrumentModule = ({ onParamChange, params }: State) => {
   );
 };
 
-export default InstrumentModule;
+export default PolySynth;

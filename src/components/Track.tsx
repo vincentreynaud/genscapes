@@ -5,7 +5,7 @@ import { Scale } from '@tonaljs/tonal';
 import { nanoid } from '@reduxjs/toolkit';
 import find from 'lodash/find';
 
-import DraggableRangeInput from './DraggableRangeInput';
+import DraggableRangeInput from './shared/DraggableRangeInput';
 import TrackSettings from './TrackSettings';
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
 import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam } from '../reducers/params';
@@ -242,29 +242,67 @@ export default function Track({ trackId }: Props) {
   const handleDeleteEffect = (effectName: string) => {};
 
   return (
-    <div id={`track-${trackId}`} className='container-fluid'>
-      <div className='row'>
-        {signalChain.map((mod, i) => {
-          if (mod.type === 'source') {
-            return (
-              <div className='col' key={i}>
-                <h4>{MODULES_DISPLAY_NAMES_MAP[mod.name]}</h4>
-                <div className='d-flex'>
-                  <DraggableRangeInput
-                    label='A'
-                    min={polySynth.attack.min}
-                    max={polySynth.attack.max}
-                    step={polySynth.attack.step}
-                    unit={polySynth.attack.unit}
-                    value={attack}
-                    onChange={onModuleParamChange('options.options.envelope.attack')}
-                    className='mb-2'
-                  />
+    <>
+      <div id={`track-${trackId}`} className='container-fluid'>
+        <div className='row'>
+          {signalChain.map((mod, i) => {
+            if (mod.type === 'source') {
+              return (
+                <div className='col' key={i}>
+                  <h4>{MODULES_DISPLAY_NAMES_MAP[mod.name]}</h4>
+                  <div className='container-fluid p-0'>
+                    <div className='row'>
+                      <div className='col-auto'>
+                        <DraggableRangeInput
+                          label='A'
+                          min={polySynth.attack.min}
+                          max={polySynth.attack.max}
+                          step={polySynth.attack.step}
+                          unit={polySynth.attack.unit}
+                          value={attack}
+                          onChange={onModuleParamChange('options.options.envelope.attack')}
+                          className='mb-2'
+                        />
+                        <DraggableRangeInput
+                          label='D'
+                          min={polySynth.decay.min}
+                          max={polySynth.decay.max}
+                          step={polySynth.decay.step}
+                          unit={polySynth.decay.unit}
+                          value={decay}
+                          onChange={onModuleParamChange('options.options.envelope.decay')}
+                          className='mb-2'
+                        />
+                      </div>
+                      <div className='col-auto'>
+                        <DraggableRangeInput
+                          label='S'
+                          min={polySynth.sustain.min}
+                          max={polySynth.sustain.max}
+                          step={polySynth.sustain.step}
+                          unit={polySynth.sustain.unit}
+                          value={sustain}
+                          onChange={onModuleParamChange('options.options.envelope.sustain')}
+                          className='mb-2'
+                        />
+                        <DraggableRangeInput
+                          label='R'
+                          min={polySynth.release.min}
+                          max={polySynth.release.max}
+                          step={polySynth.release.step}
+                          unit={polySynth.release.unit}
+                          value={release}
+                          onChange={onModuleParamChange('options.options.envelope.release')}
+                          className='mb-2'
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          }
-        })}
+              );
+            }
+          })}
+        </div>
       </div>
       <TrackSettings
         trackId={trackId}
@@ -274,6 +312,6 @@ export default function Track({ trackId }: Props) {
         onAddEffect={handleAddEffect}
         onDeleteEffect={handleDeleteEffect}
       />
-    </div>
+    </>
   );
 }

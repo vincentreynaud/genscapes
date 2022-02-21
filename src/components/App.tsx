@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect } from 'react';
 import { Gain } from 'tone';
 import toNumber from 'lodash/toNumber';
-import RangeInput from './RangeInput';
+import RangeInput from './shared/RangeInput';
 import Track from './Track';
 import { setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
 import { setGlobalAudioComponent } from '../reducers/audio';
@@ -11,7 +11,6 @@ import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers'
 import '../styles/index.scss';
 
 const App = memo(() => {
-  const trackId = 0;
   const dispatch = useAppDispatch();
   const globalParams = useAppSelector(selectGlobalParams);
   const globalAudio = useAppSelector(selectGlobalAudio);
@@ -74,7 +73,7 @@ const App = memo(() => {
         </div>
       </div>
       {tracksIds.map((id) => (
-        <Track trackId={id} />
+        <Track key={id} trackId={id} />
       ))}
     </div>
   );

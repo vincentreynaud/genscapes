@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import AddButton from './AddButton';
-import CompositionModule from './CompositionModule';
-import InstrumentModule from './InstrumentModule';
+import AddButton from './shared/AddButton';
+import Composition from './modules/Composition';
+import PolySynth from './modules/PolySynth';
 import { useAppSelector } from '../hooks';
 import { makeSelectParamModuleByType, makeSelectTrackParams } from '../selectors';
 import { PolySynthParamsModule, UpdateModuleParamHelper, UpdateTrackParamHelper } from '../types/params';
@@ -37,7 +37,7 @@ export default function TrackSettings({
     <div className='track-settings'>
       <section className='container-fluid'>
         <div className='row'>
-          <InstrumentModule onParamChange={onModuleParamChange} params={sourceParams as PolySynthParamsModule} />
+          <PolySynth onParamChange={onModuleParamChange} params={sourceParams as PolySynthParamsModule} />
           {effectsParams.map((effect, i) => {
             const Component = mapEffectNameToUiComponent()[effect.name];
             return <Component params={effect} onParamChange={onModuleParamChange} onDelete={onDeleteEffect} key={i} />;
@@ -47,7 +47,7 @@ export default function TrackSettings({
       </section>
       <section className='container-fluid'>
         <div className='row'>
-          <CompositionModule
+          <Composition
             onParamChange={onTrackParamChange}
             params={compositionParams}
             setCurrentScale={setCurrentScale}
