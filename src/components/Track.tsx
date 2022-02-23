@@ -4,11 +4,9 @@ import { Pattern, PolySynth, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import { nanoid } from '@reduxjs/toolkit';
 import find from 'lodash/find';
-import { VscSettings } from '@react-icons/all-files/vsc/VscSettings.esm';
 import { RiVolumeDownFill } from '@react-icons/all-files/ri/RiVolumeDownFill.esm';
 import { IoMdClose } from '@react-icons/all-files/io/IoMdClose.esm';
 
-import TrackSettings from './TrackSettings';
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
 import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam } from '../reducers/params';
 import { chainTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
@@ -41,6 +39,7 @@ import PolySynthUiMin from './modules/PolySynthUiMin';
 import SliderInput from './shared/SliderInput';
 import { toInteger } from 'lodash';
 import IconButton from './shared/IconButton';
+import TrackSettingsModal from './TrackSettingsModal';
 
 type Props = {
   trackId: number;
@@ -272,9 +271,14 @@ export default function Track({ trackId }: Props) {
                 />
               </div>
               <div className='col-auto'>
-                <IconButton>
-                  <VscSettings />
-                </IconButton>
+                <TrackSettingsModal
+                  trackId={trackId}
+                  setCurrentScale={setCurrentScale}
+                  onTrackParamChange={handleChangeTrackParam}
+                  onModuleParamChange={handleChangeModuleParam}
+                  onAddEffect={handleAddEffect}
+                  onDeleteEffect={handleDeleteEffect}
+                />
               </div>
               <div className='col-auto'>
                 <IconButton>
@@ -285,14 +289,6 @@ export default function Track({ trackId }: Props) {
           </div>
         </div>
       </div>
-      <TrackSettings
-        trackId={trackId}
-        setCurrentScale={setCurrentScale}
-        onTrackParamChange={handleChangeTrackParam}
-        onModuleParamChange={handleChangeModuleParam}
-        onAddEffect={handleAddEffect}
-        onDeleteEffect={handleDeleteEffect}
-      />
     </>
   );
 }

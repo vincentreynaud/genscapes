@@ -52,9 +52,53 @@ select {
   position: relative;
 }
 
-.box {
+#main-controls {
+  position: fixed;
+  bottom: 0;
+  height: 5rem;
+  width: 100%;
+}
+
+#play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+}
+
+#volume {
+  position: absolute;
+  top: 50%;
+  right: 4rem;
+  transform: translateY(-50%);
+}
+
+#body {
+  .modal-dialog {
+    width: 100%;
+    max-width: unset;
+  }
+  .modal-content {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+  }
+  .modal-backdrop {
+    background-color: rgba($black, 0.5);
+    backdrop-filter: blur(5px);
+
+    &.show {
+      opacity: 1;
+    }
+  }
+}
+
+.module {
   border: $mod-border;
   border-radius: $mod-border-radius;
+  background: rgba($white, 0.05);
+  backdrop-filter: blur(5px);
   padding: 0.75rem;
   margin: 0.5rem;
 }
@@ -205,24 +249,9 @@ div[id^='track'] {
   }
 }
 
-#main-controls {
-  position: fixed;
-  bottom: 0;
-  height: 5rem;
-  width: 100%;
-}
-
-#play-button {
+.btn-close-modal {
+  font-size: 1.2rem;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-}
-
-#volume {
-  position: absolute;
-  top: 50%;
-  right: 4rem;
-  transform: translateY(-50%);
+  right: 3rem;
+  top: 0;
 }
