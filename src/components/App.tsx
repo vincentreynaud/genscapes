@@ -7,7 +7,7 @@ import { addTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/
 import { addTrack as addTrackAudio, setGlobalAudioComponent } from '../reducers/audio';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
-import { getParamsFromUrl, isTracksStateType, pickRandomElement, updateUrlQuery } from '../helpers';
+import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers';
 import '../styles/index.scss';
 import { RiPlayFill } from '@react-icons/all-files/ri/RiPlayFill.esm';
 import { RiStopFill } from '@react-icons/all-files/ri/RiStopFill.esm';
@@ -35,16 +35,17 @@ const App = memo(() => {
   // need to create a system that creates
   useEffect(() => {
     const value = getParamsFromUrl();
+    console.log(JSON.stringify(value));
     if (!isTracksStateType(value)) {
       console.error("Prevented state update because the url query params structure differs from the app's state one");
     } else {
-      // dispatch(updateAllParams({ value }));
+      dispatch(updateAllParams({ value }));
     }
   }, []);
 
   // update url query on params change
   useEffect(() => {
-    // updateUrlQuery(tracksState);
+    updateUrlQuery(tracksState);
   }, [tracksState]);
 
   const togglePlay = useCallback(() => {

@@ -2,7 +2,7 @@ import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
 import toString from 'lodash/toString';
 import random from 'lodash/random';
 import round from 'lodash/round';
-import { initialTrackId } from '../initialState';
+import every from 'lodash/every';
 import { EffectParamsModule, SourceParamsModule, TracksState, TrackState } from '../types/params';
 
 export const pickRandomElement = (arr: any[] = []) => arr[random(0, arr.length - 1)];
@@ -59,7 +59,13 @@ export function isTracksStateType(p: any): p is TracksState {
   if (!p) {
     return false;
   }
-  return p[initialTrackId]?.notes?.root !== undefined && p[initialTrackId]?.composition?.noteLength !== undefined;
+  const keys = Object.keys(p);
+  const areTracksCompoStateValid = keys.map((key) => p[key]?.composition?.noteLength !== undefined);
+  const areTracksNotesStateValid = keys.map((key) => {
+    return p[key]?.composition?.notes?.scaleName !== undefined;
+  });
+  const checks = [...areTracksCompoStateValid, ...areTracksNotesStateValid];
+  return every(checks, (check) => check === true);
 }
 
 export function isSourceParamsModule(mod: SourceParamsModule | EffectParamsModule): mod is SourceParamsModule {
