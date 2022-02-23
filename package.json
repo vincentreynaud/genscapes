@@ -19,6 +19,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@elemaudio/core-lite": "^0.11.0",
     "@react-icons/all-files": "^4.1.0",
     "@reduxjs/toolkit": "^1.6.2",
     "@testing-library/jest-dom": "^5.11.4",
