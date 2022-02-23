@@ -26,7 +26,7 @@ export default function RangeInput({ label, min, max, step, unit, value, onChang
 
   return (
     <div className={className}>
-      <label>{label}</label>
+      {label ? <label>{label}</label> : null}
       <div className='slider d-flex align-items-center'>
         <input
           type='range'

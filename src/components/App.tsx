@@ -66,7 +66,7 @@ const App = memo(() => {
   };
 
   return (
-    <div className='content'>
+    <div className='app'>
       <div id='main-controls'>
         <IconButton id='play-button' onClick={togglePlay}>
           {playing ? <RiStopFill /> : <RiPlayFill />}
@@ -75,9 +75,11 @@ const App = memo(() => {
           <RangeInput label='' min={0} max={1} step={0.1} unit='' value={volume} onChange={handleChangeGlobalParam} />
         </div>
       </div>
-      {tracksIds.map((id) => (
-        <Track key={id} trackId={id} />
-      ))}
+      <div id='tracks-view'>
+        {tracksIds.map((id) => (
+          <Track key={id} trackId={id} />
+        ))}
+      </div>
     </div>
   );
 });
