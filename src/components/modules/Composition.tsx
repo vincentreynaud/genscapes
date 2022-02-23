@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ModuleWrapper from '../shared/ModuleWrapper';
 import SliderInput from '../shared/SliderInput';
 import { TrackCompositionState, UpdateTrackParamHelper } from '../../types/params';
-import { getNoteNames, getOctaves, getScaleTypes } from '../../lib/constants';
+import {
+  getNoteNames,
+  getOctaves,
+  getScaleTypes,
+  getTrackParamsBoundaries,
+  MODULES_DISPLAY_NAMES_MAP,
+} from '../../lib/constants';
+import Select from '../shared/Select';
 
 type State = {
   onParamChange: UpdateTrackParamHelper;
@@ -12,52 +19,39 @@ type State = {
 
 const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
   const { notes } = params;
+  const { composition: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
+
   const handleParamChange = (param) => (value: number) => {
     onParamChange(param, value);
   };
 
   return (
-    <ModuleWrapper id='composition-module' title='Composition'>
+    <ModuleWrapper id='composition-module' title={MODULES_DISPLAY_NAMES_MAP['composition']}>
       <div className='container-fluid px-0'>
         <div className='row'>
           <div className='col-auto'>
             <h3>Notes</h3>
-            <select
+            <Select
               name='root'
-              id='root-select'
               value={notes.root}
+              options={getNoteNames().map((note) => ({ value: note, label: note }))}
+              id='root-select'
               onChange={(e) => setCurrentScale(e.currentTarget.value, notes.octave, notes.scaleType)}
-            >
-              {getNoteNames().map((note, i) => (
-                <option value={note} key={i}>
-                  {note}
-                </option>
-              ))}
-            </select>
-            <select
+            />
+            <Select
               name='octave'
-              id='octave-select'
               value={notes.octave}
+              options={getOctaves().map((octave) => ({ value: octave, label: octave }))}
+              id='octave-select'
               onChange={(e) => setCurrentScale(notes.root, e.currentTarget.value, notes.scaleType)}
-            >
-              {getOctaves().map((octave) => (
-                <option value={octave.toString()} key={octave}>
-                  {octave}
-                </option>
-              ))}
-            </select>
-            <select
+            />
+            <Select
               name='scaleType'
-              id='scale-type-select'
               value={notes.scaleType}
+              options={getScaleTypes().map((scale) => ({ value: scale, label: scale }))}
+              id='scale-type-select'
               onChange={(e) => setCurrentScale(notes.root, notes.octave, e.currentTarget.value)}
-            >
-              {getScaleTypes().map((scale, i) => (
-                <option value={scale} key={i}>
-                  {scale}
-                </option>
-              ))}
-            </select>
+            />
             <div className='my-2' id='notes-display'>
               {notes.scale && notes.scale.join(' ')}
             </div>
@@ -69,44 +63,44 @@ const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
                 <div className='col-auto'>
                   <SliderInput
                     label='Note length'
-                    min={0.2}
-                    max={48}
-                    step={0.1}
-                    unit='s'
+                    min={boundaries.noteLength.min}
+                    max={boundaries.noteLength.max}
+                    step={boundaries.noteLength.step}
+                    unit={boundaries.noteLength.unit}
                     value={params.noteLength}
                     onChange={handleParamChange('noteLength')}
                     className='mb-2'
                   />
                   <SliderInput
-                    label='Rand.'
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    unit='%'
-                    value={params.randomiseNoteLength}
-                    onChange={handleParamChange('randomiseNoteLength')}
+                    label='Interval'
+                    min={boundaries.interval.min}
+                    max={boundaries.interval.max}
+                    step={boundaries.interval.step}
+                    unit={boundaries.interval.unit}
+                    value={params.interval}
+                    onChange={handleParamChange('interval')}
                     className='mb-2'
                   />
                 </div>
                 <div className='col-auto'>
                   <SliderInput
-                    label='Interval'
-                    min={0}
-                    max={48}
-                    step={0.1}
-                    unit='s'
-                    value={params.interval}
-                    onChange={handleParamChange('interval')}
+                    label='Rand.'
+                    min={boundaries.randNoteLength.min}
+                    max={boundaries.randNoteLength.max}
+                    step={boundaries.randNoteLength.step}
+                    unit={boundaries.randNoteLength.unit}
+                    value={params.randNoteLength}
+                    onChange={handleParamChange('randNoteLength')}
                     className='mb-2'
                   />
                   <SliderInput
                     label='Rand.'
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    unit='%'
-                    value={params.randomiseInterval}
-                    onChange={handleParamChange('randomiseInterval')}
+                    min={boundaries.randInterval.min}
+                    max={boundaries.randInterval.max}
+                    step={boundaries.randInterval.step}
+                    unit={boundaries.randInterval.unit}
+                    value={params.randInterval}
+                    onChange={handleParamChange('randInterval')}
                     className='mb-2'
                   />
                 </div>

@@ -21,7 +21,7 @@ export default function PolySynthUiMin({ onParamChange, mod }: Props) {
   };
 
   return (
-    <div className='col'>
+    <div className='col-auto'>
       <h4>{MODULES_DISPLAY_NAMES_MAP[mod.name]}</h4>
       <div className='container-fluid p-0'>
         <div className='row'>

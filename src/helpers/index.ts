@@ -25,13 +25,13 @@ export function calcRandom(value: number, randAmount: number) {
 }
 
 export function getCurrentNoteLength(composition: TrackState['composition']) {
-  const { noteLength, randomiseNoteLength } = composition;
-  return calcRandom(noteLength, randomiseNoteLength);
+  const { noteLength, randNoteLength } = composition;
+  return calcRandom(noteLength, randNoteLength);
 }
 
 export function getCurrentInterval(composition: TrackState['composition']) {
-  const { interval, randomiseInterval } = composition;
-  return calcRandom(interval, randomiseInterval);
+  const { interval, randInterval } = composition;
+  return calcRandom(interval, randInterval);
 }
 
 export function getCurrentDetune(detune: number, rand: number) {

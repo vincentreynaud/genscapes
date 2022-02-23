@@ -40,6 +40,7 @@ import SliderInput from './shared/SliderInput';
 import { toInteger } from 'lodash';
 import IconButton from './shared/IconButton';
 import TrackSettingsModal from './TrackSettingsModal';
+import CompositionUiMin from './modules/CompositionUiMin';
 
 type Props = {
   trackId: number;
@@ -73,7 +74,7 @@ export default function Track({ trackId, color }: Props) {
       options: { detune },
     },
     tremoloOptions: { rate: modulationRate, amount: modulationAmount },
-    rand: { detune: randomiseDetune },
+    rand: { detune: randDetune },
   } = sourceParams as any; // just to make it shut up for now
 
   const chainPolySynth = useCallback(
@@ -169,12 +170,12 @@ export default function Track({ trackId, color }: Props) {
     (time, note) => {
       const noteLength = getCurrentNoteLength(compositionParams);
       const interval = getCurrentInterval(compositionParams);
-      const currentDetune = getCurrentDetune(detune, randomiseDetune);
+      const currentDetune = getCurrentDetune(detune, randDetune);
       console.log(note, currentDetune, 'interval', interval, 'noteLength', noteLength);
       sourceNode?.set({ detune: currentDetune });
       sourceNode?.triggerAttackRelease(note, noteLength, time + interval);
     },
-    [sourceNode, compositionParams, detune, randomiseDetune]
+    [sourceNode, compositionParams, detune, randDetune]
   );
 
   // Update pattern
@@ -256,6 +257,11 @@ export default function Track({ trackId, color }: Props) {
               return <Component key={i} onParamChange={handleChangeModuleParam} mod={mod} />;
             }
           })}
+          <CompositionUiMin
+            params={compositionParams}
+            onParamChange={handleChangeTrackParam}
+            setCurrentScale={setCurrentScale}
+          />
         </div>
         <div className='top-settings'>
           <div className='container-fluid p-0'>

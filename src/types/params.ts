@@ -59,9 +59,9 @@ export type TrackCompositionState = {
     octave: string;
   };
   noteLength: number;
-  randomiseNoteLength: number;
+  randNoteLength: number;
   interval: number;
-  randomiseInterval: number;
+  randInterval: number;
 };
 
 export type AddEffectPayload = {

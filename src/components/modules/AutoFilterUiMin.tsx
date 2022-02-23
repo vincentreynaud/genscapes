@@ -22,8 +22,8 @@ export default function AutoFilterUiMin({ onParamChange, mod }: Props) {
   };
 
   return (
-    <div className='col'>
-      <h4>{MODULES_DISPLAY_NAMES_MAP[mod.name]}</h4>
+    <div className='col-auto'>
+      <h5>{MODULES_DISPLAY_NAMES_MAP[mod.name]}</h5>
       <div className='container-fluid p-0'>
         <div className='row'>
           <div className='col-auto'>

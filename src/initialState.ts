@@ -53,9 +53,9 @@ export function initTrackState(): TrackState {
     composition: {
       notes: initNotes(),
       noteLength: 10,
-      randomiseNoteLength: 0.8,
+      randNoteLength: 0.8,
       interval: 8,
-      randomiseInterval: 0.8,
+      randInterval: 0.8,
     },
   };
 }
