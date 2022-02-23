@@ -1,3 +1,4 @@
+import React from 'react';
 import { VscSettings } from '@react-icons/all-files/vsc/VscSettings.esm';
 import { Modal } from 'reactstrap';
 import TrackSettings from './TrackSettings';

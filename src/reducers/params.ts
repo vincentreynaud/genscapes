@@ -7,11 +7,12 @@ import {
   AddEffectPayload,
   UpdateAllParamsPayload,
   PolySynthParamsModule,
+  TrackId,
 } from '../types/params';
 import { KeyValuePair } from '../types/shared';
-import { getInitialParamsState } from '../initialState';
+import { initParamsState, initTrackState } from '../initialState';
 
-let initialState = getInitialParamsState();
+let initialState = initParamsState();
 
 const paramsSlice = createSlice({
   name: 'params',
@@ -19,6 +20,12 @@ const paramsSlice = createSlice({
   reducers: {
     setPlay(state, action: PayloadAction<boolean>) {
       state.global.playing = action.payload;
+    },
+    addTrack(state, action: PayloadAction<number>) {
+      state.tracks[action.payload] = initTrackState();
+    },
+    deleteTrack(state, action: PayloadAction<TrackId>) {
+      delete state.tracks[action.payload];
     },
     setGlobalParam: {
       reducer(state, action: PayloadAction<KeyValuePair>) {
@@ -40,15 +47,6 @@ const paramsSlice = createSlice({
         return { payload };
       },
     },
-    updateAllParams: {
-      reducer(state, action: PayloadAction<UpdateAllParamsPayload>) {
-        const { value } = action.payload;
-        state.tracks = value;
-      },
-      prepare(payload: UpdateAllParamsPayload) {
-        return { payload };
-      },
-    },
     updateModuleParam: {
       reducer(state, action: PayloadAction<UpdateModuleParamPayload>) {
         const { trackId, modId, path, value } = action.payload;
@@ -56,6 +54,15 @@ const paramsSlice = createSlice({
         set(mod as PolySynthParamsModule, path, value);
       },
       prepare(payload: UpdateModuleParamPayload) {
+        return { payload };
+      },
+    },
+    updateAllParams: {
+      reducer(state, action: PayloadAction<UpdateAllParamsPayload>) {
+        const { value } = action.payload;
+        state.tracks = value;
+      },
+      prepare(payload: UpdateAllParamsPayload) {
         return { payload };
       },
     },
@@ -68,13 +75,18 @@ const paramsSlice = createSlice({
         return { payload: { trackId, effect } };
       },
     },
-    // todoDeleted(state, action) {
-    //   delete state.entities[action.payload]
-    // }
   },
 });
 
-export const { updateTrackParam, updateModuleParam, updateAllParams, addEffect, setPlay, setGlobalParam } =
-  paramsSlice.actions;
+export const {
+  addTrack,
+  deleteTrack,
+  updateTrackParam,
+  updateModuleParam,
+  updateAllParams,
+  addEffect,
+  setPlay,
+  setGlobalParam,
+} = paramsSlice.actions;
 
 export default paramsSlice.reducer;

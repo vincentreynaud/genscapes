@@ -43,14 +43,13 @@ import TrackSettingsModal from './TrackSettingsModal';
 
 type Props = {
   trackId: number;
+  color: string;
 };
 
-export default function Track({ trackId }: Props) {
+export default function Track({ trackId, color }: Props) {
   const dispatch = useAppDispatch();
   const selectEffectsParams = useMemo(() => makeSelectParamModuleByType(trackId, 'effect'), [trackId]);
   const selectSourceParams = useMemo(() => makeSelectParamModuleByType(trackId, 'source'), [trackId]);
-  const selectSourceNodes = useMemo(() => makeSelectToneNodesByType(trackId, 'source'), [trackId]) as SelectSourceNodes;
-  const selectEffectNodes = useMemo(() => makeSelectToneNodesByType(trackId, 'effect'), [trackId]);
   const selectEffectAudioModules = useMemo(() => makeSelectAudioModuleByType(trackId, 'effect'), [trackId]);
   const selectTrackParams = useMemo(() => makeSelectTrackParams(trackId), [trackId]);
   const selectTrackAudio = useMemo(() => makeSelectTrackAudio(trackId), [trackId]);
@@ -61,27 +60,41 @@ export default function Track({ trackId }: Props) {
   const trackAudio = useAppSelector(selectTrackAudio);
   const [sourceParams] = useAppSelector(selectSourceParams);
   const effectsParams = useAppSelector(selectEffectsParams);
-  const [sourceNode] = useAppSelector(selectSourceNodes);
+  const [changedParamsMod]: TrackState['signalChain'] = useWhatChanged([sourceParams, ...effectsParams]);
   const effectAudioModules = useAppSelector(selectEffectAudioModules);
-  const effectNodes = useAppSelector(selectEffectNodes);
   const { signalChain: signalChainParams, composition: compositionParams } = trackParams;
   const { notes } = compositionParams;
   const { scale } = notes;
-  const { signalChain, composition } = trackAudio;
+  const { composition } = trackAudio;
   const { playing } = globalParams;
   const { outputNode } = globalAudio;
   const {
     options: {
-      options: {
-        detune,
-        oscillator: { type: waveform },
-        envelope: { attack, decay, release, sustain },
-      },
+      options: { detune },
     },
     tremoloOptions: { rate: modulationRate, amount: modulationAmount },
     rand: { detune: randomiseDetune },
   } = sourceParams as any; // just to make it shut up for now
-  const [changedParamsMod]: TrackState['signalChain'] = useWhatChanged([sourceParams, ...effectsParams]);
+
+  const chainPolySynth = useCallback(
+    (source, lfo) => {
+      source.chain(lfo, outputNode);
+
+      const synthModule = {
+        name: 'polySynth',
+        type: 'source',
+        id: sourceParams.id,
+        toneNode: source,
+      };
+      const lfoModule = { name: 'tremolo', type: 'effect', id: sourceParams.id, toneNode: lfo };
+
+      // TODO: RESET SIGNAL CHAIN ON NEW SOURCE SET UP
+      dispatch(chainTrackAudioComponent(trackId, synthModule));
+      dispatch(chainTrackAudioComponent(trackId, lfoModule));
+      console.log('initialised polySynth');
+    },
+    [outputNode, sourceParams.id, trackId, dispatch]
+  );
 
   // init component
   useEffect(() => {
@@ -92,24 +105,12 @@ export default function Track({ trackId }: Props) {
     } else {
       console.error(`outputNode is ${outputNode}`);
     }
-  }, [outputNode]);
+  }, [outputNode, chainPolySynth]);
 
-  function chainPolySynth(source, lfo) {
-    source.chain(lfo, outputNode);
-
-    const synthModule = {
-      name: 'polySynth',
-      type: 'source',
-      id: sourceParams.id,
-      toneNode: source,
-    };
-    const lfoModule = { name: 'tremolo', type: 'effect', id: sourceParams.id, toneNode: lfo };
-
-    // TODO: RESET SIGNAL CHAIN ON NEW SOURCE SET UP
-    dispatch(chainTrackAudioComponent(trackId, synthModule));
-    dispatch(chainTrackAudioComponent(trackId, lfoModule));
-    console.log('initialised polySynth');
-  }
+  const selectSourceNodes = useMemo(() => makeSelectToneNodesByType(trackId, 'source'), [trackId]) as SelectSourceNodes;
+  const selectEffectNodes = useMemo(() => makeSelectToneNodesByType(trackId, 'effect'), [trackId]);
+  const [sourceNode] = useAppSelector(selectSourceNodes);
+  const effectNodes = useAppSelector(selectEffectNodes);
 
   const handleChangeTrackParam: UpdateTrackParamHelper = (path, value) => {
     dispatch(updateTrackParam({ trackId, path, value }));
@@ -245,7 +246,7 @@ export default function Track({ trackId }: Props) {
 
   return (
     <>
-      <div id={`track-${trackId}`} className='container-fluid'>
+      <div id={`track-${trackId}`} className={`container-fluid ${color}`}>
         <div className='row'>
           {signalChainParams.map((mod, i) => {
             if (isSourceParamsModule(mod)) {

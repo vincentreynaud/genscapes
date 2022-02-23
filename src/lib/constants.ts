@@ -1,7 +1,7 @@
 import range from 'lodash/range';
 import { AutoFilter, Delay, Reverb } from 'tone';
 import { Note, Scale } from '@tonaljs/tonal';
-import { getInitialAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
+import { initAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
 import AutoFilterUi from '../components/modules/AutoFilterUi';
 import { ToneAudioEffect } from '../types/audio';
 import { EffectName, EffectParamsModule } from '../types/params';
@@ -128,7 +128,7 @@ export const mapEffectNameToToneComponent = (): Record<EffectName, ToneAudioEffe
 
 export const mapEffectNameToInitialState = (): Record<EffectName, EffectParamsModule> => {
   return {
-    autoFilter: getInitialAutoFilterState(),
+    autoFilter: initAutoFilterState(),
     reverb: initialReverbState,
     delay: initialDelayState,
   };

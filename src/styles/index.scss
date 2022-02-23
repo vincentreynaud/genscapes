@@ -1,5 +1,6 @@
 @import 'bootstrap-custom';
 @import 'variables';
+@import 'mixins';
 
 body {
   background: $base-bg !important;
@@ -48,7 +49,7 @@ select {
 }
 
 .app {
-  height: 100vw;
+  height: 100vh;
   position: relative;
 }
 
@@ -92,7 +93,7 @@ select {
     border-radius: 0;
   }
   .modal-backdrop {
-    background-color: rgba($black, 0.5);
+    background-color: rgba($black, 0.75);
     backdrop-filter: blur(5px);
 
     &.show {
@@ -105,7 +106,7 @@ select {
   border: $mod-border;
   border-radius: $mod-border-radius;
   background: rgba($white, 0.05);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(10px);
   padding: 0.75rem;
   margin: 0.5rem;
 }
@@ -226,11 +227,53 @@ span.control-value {
   }
 }
 
+// because i didn't manage to overwrite bootstrap's primary 😡
+div[id^='track-'] .bg-primary,
+.modal .bg-primary {
+  background-color: $primary !important;
+}
+
 div[id^='track-'] {
   padding: map-get($spacers, 2);
   padding-right: 8rem;
-  background: rgba($white, 0.1);
   position: relative;
+  border-bottom: $track-border;
+  backdrop-filter: brightness(120%);
+
+  &:nth-last-child(2) {
+    border-top: $track-border;
+  }
+
+  &.indigo {
+    @include trackColor($indigo);
+  }
+  &.purple {
+    @include trackColor($purple);
+  }
+  &.blue {
+    @include trackColor($blue);
+  }
+  &.pink {
+    @include trackColor($pink);
+  }
+  &.red {
+    @include trackColor($red);
+  }
+  &.orange {
+    @include trackColor($orange);
+  }
+  &.yellow {
+    @include trackColor($yellow);
+  }
+  &.green {
+    @include trackColor($green);
+  }
+  &.teal {
+    @include trackColor($teal);
+  }
+  &.cyan {
+    @include trackColor($cyan);
+  }
 
   .top-settings {
     position: absolute;
@@ -247,12 +290,28 @@ div[id^='track-'] {
 .icon-button {
   border: none;
   border-radius: $base-border-radius;
-  background: transparent;
-  color: $base-body-color;
   transition: background ease-in-out 0.1s;
+  font-size: 1.5rem;
 
-  &:hover {
+  .size-sm {
+    font-size: 1rem;
+  }
+
+  &.variant-text {
+    background: transparent;
+    color: $base-body-color;
+
+    &:hover {
+      background: rgba($white, 0.1);
+    }
+  }
+  &.variant-filled {
     background: rgba($white, 0.1);
+    color: $base-body-color;
+
+    &:hover {
+      background: rgba($white, 0.25);
+    }
   }
 }
 

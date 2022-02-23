@@ -4,6 +4,7 @@ import { Synth } from 'tone';
 import { getNoteNames, getOctaves, getScaleTypes } from './lib/constants';
 import { AutoFilterParamsModule, EffectParamsModule, SourceParamsModule, TrackState } from './types/params';
 import { pickRandomElement } from './helpers';
+import { AudioState } from './types/audio';
 
 export const initialTrackId: number = 0;
 
@@ -16,7 +17,7 @@ export function initNotes() {
   return { root, octave, scaleType, scaleName, scale };
 }
 
-export function getInitialSourceState(): SourceParamsModule {
+export function initSourceState(): SourceParamsModule {
   return {
     name: 'polySynth',
     type: 'source',
@@ -46,9 +47,9 @@ export function getInitialSourceState(): SourceParamsModule {
   };
 }
 
-export function getInitialTrackState(): TrackState {
+export function initTrackState(): TrackState {
   return {
-    signalChain: [getInitialSourceState()],
+    signalChain: [initSourceState()],
     composition: {
       notes: initNotes(),
       noteLength: 10,
@@ -59,19 +60,37 @@ export function getInitialTrackState(): TrackState {
   };
 }
 
-export function getInitialParamsState() {
+export function initAudioState() {
+  return {
+    tracks: {
+      [initialTrackId]: initTrackAudioState(),
+    },
+    global: {
+      outputNode: null,
+    },
+  } as AudioState;
+}
+
+export function initTrackAudioState() {
+  return {
+    signalChain: [],
+    composition: {},
+  };
+}
+
+export function initParamsState() {
   return {
     global: {
       playing: false,
       volume: 0.5,
     },
     tracks: {
-      [initialTrackId]: getInitialTrackState(),
+      [initialTrackId]: initTrackState(),
     },
   };
 }
 
-export function getInitialAutoFilterState(): AutoFilterParamsModule {
+export function initAutoFilterState(): AutoFilterParamsModule {
   return {
     name: 'autoFilter',
     type: 'effect',

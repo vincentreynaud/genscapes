@@ -1,16 +1,17 @@
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Gain } from 'tone';
 import toNumber from 'lodash/toNumber';
 import RangeInput from './shared/RangeInput';
 import Track from './Track';
-import { setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
-import { setGlobalAudioComponent } from '../reducers/audio';
+import { addTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
+import { addTrack as addTrackAudio, setGlobalAudioComponent } from '../reducers/audio';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
-import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers';
+import { getParamsFromUrl, isTracksStateType, pickRandomElement, updateUrlQuery } from '../helpers';
 import '../styles/index.scss';
 import { RiPlayFill } from '@react-icons/all-files/ri/RiPlayFill.esm';
 import { RiStopFill } from '@react-icons/all-files/ri/RiStopFill.esm';
+import { RiAddFill } from '@react-icons/all-files/ri/RiAddFill.esm';
 import IconButton from './shared/IconButton';
 
 const App = memo(() => {
@@ -30,18 +31,20 @@ const App = memo(() => {
   }, []);
 
   // update params state from url query
+  // ISSUE: probably does not update the entirety of the audio
+  // need to create a system that creates
   useEffect(() => {
     const value = getParamsFromUrl();
     if (!isTracksStateType(value)) {
       console.error("Prevented state update because the url query params structure differs from the app's state one");
     } else {
-      dispatch(updateAllParams({ value }));
+      // dispatch(updateAllParams({ value }));
     }
   }, []);
 
   // update url query on params change
   useEffect(() => {
-    updateUrlQuery(tracksState);
+    // updateUrlQuery(tracksState);
   }, [tracksState]);
 
   const togglePlay = useCallback(() => {
@@ -65,6 +68,25 @@ const App = memo(() => {
     dispatch(setGlobalParam('volume', value));
   };
 
+  function handleAddTrack() {
+    const id = Object.keys(tracksState).length;
+    dispatch(addTrackAudio(id));
+    dispatch(addTrack(id));
+  }
+
+  const [colors, setColors] = useState([
+    'green',
+    'blue',
+    'purple',
+    'pink',
+    'yellow',
+    'red',
+    'indigo',
+    'teal',
+    'cyan',
+    'orange',
+  ]);
+
   return (
     <div className='app'>
       <div id='main-controls'>
@@ -77,8 +99,13 @@ const App = memo(() => {
       </div>
       <div id='tracks-view'>
         {tracksIds.map((id) => (
-          <Track key={id} trackId={id} />
+          <Track key={id} trackId={id} color={colors[id]} />
         ))}
+        <div className='d-flex justify-content-center align-items-center'>
+          <IconButton id='add-track-btn' className='my-3' variant='filled' onClick={handleAddTrack}>
+            <RiAddFill />
+          </IconButton>
+        </div>
       </div>
     </div>
   );

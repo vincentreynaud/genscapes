@@ -1,19 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Gain, Pattern, PolySynth } from 'tone';
-import { AudioModule, AudioState } from '../types/audio';
+import { initAudioState, initTrackAudioState } from '../initialState';
+import { AudioModule } from '../types/audio';
 import { KeyValuePair } from '../types/shared';
 
-const initialState = {
-  tracks: {
-    0: {
-      signalChain: [],
-      composition: {},
-    },
-  },
-  global: {
-    outputNode: null,
-  },
-} as AudioState;
+const initialState = initAudioState();
 
 interface SetGlobalAudioComponentPayload extends KeyValuePair {
   value: Gain | PolySynth;
@@ -45,6 +36,9 @@ const audioSlice = createSlice({
         };
       },
     },
+    addTrack(state, action: PayloadAction<number>) {
+      state.tracks[action.payload] = initTrackAudioState();
+    },
     chainTrackAudioComponent: {
       reducer(state, action: PayloadAction<ChainTrackAudioComponentPayload>) {
         const { trackId, value } = action.payload;
@@ -61,9 +55,7 @@ const audioSlice = createSlice({
       reducer(state, action: PayloadAction<SetTrackCompositionComponentPayload>) {
         const { trackId, type, value } = action.payload;
         // find if there is already audio for this trackId
-        if (state.tracks[trackId] && state.tracks[trackId].composition) {
-          state.tracks[trackId].composition = { [type]: value };
-        }
+        state.tracks[trackId].composition = { [type]: value };
       },
       prepare(trackId: number, type: 'pattern', value: Pattern<string> | null) {
         return {
@@ -76,6 +68,6 @@ const audioSlice = createSlice({
 
 const { actions, reducer } = audioSlice;
 
-export const { chainTrackAudioComponent, setTrackCompositionComponent, setGlobalAudioComponent } = actions;
+export const { addTrack, chainTrackAudioComponent, setTrackCompositionComponent, setGlobalAudioComponent } = actions;
 
 export default reducer;

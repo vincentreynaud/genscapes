@@ -20,9 +20,10 @@ export const makeSelectAudioModuleByType = (trackId: number, type: ModuleType) =
   createSelector(selectTracksAudio, (tracks) => filter(tracks[trackId].signalChain, (mod) => mod.type === type));
 
 export const makeSelectToneNodesByType = (trackId: number, type: ModuleType) =>
-  createSelector(selectTracksAudio, (tracks): ToneSignalNode[] =>
-    filter(tracks[trackId].signalChain, (mod) => mod.type === type).map((mod) => mod?.toneNode)
-  );
+  createSelector(selectTracksAudio, (tracks): ToneSignalNode[] => {
+    console.log(trackId);
+    return filter(tracks[trackId].signalChain, (mod) => mod.type === type).map((mod) => mod?.toneNode);
+  });
 
 export const makeSelectTrackParams = (trackId: number) =>
   createSelector(selectTracksParams, (tracks) => tracks[trackId]);
