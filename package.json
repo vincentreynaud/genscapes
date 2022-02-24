@@ -17,7 +17,7 @@
     "start": "export NODE_OPTIONS=--openssl-legacy-provider; react-scripts start",
     "build": "export NODE_OPTIONS=--openssl-legacy-provider; react-scripts build",
     "predeploy": "npm run build",
-    "deploy": "npm run predeploy && gh-pages -b build",
+    "deploy": "gh-pages -b gh-pages",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
