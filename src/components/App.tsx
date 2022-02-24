@@ -11,6 +11,7 @@ import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers'
 import '../styles/index.scss';
 import { RiPlayFill, RiStopFill, RiAddFill } from 'react-icons/ri';
 import IconButton from './shared/IconButton';
+import * as Tone from 'tone';
 
 const App = memo(() => {
   const dispatch = useAppDispatch();
@@ -48,6 +49,7 @@ const App = memo(() => {
 
   const togglePlay = useCallback(() => {
     if (!playing) {
+      Tone.start();
       dispatch(setPlay(true));
     } else {
       dispatch(setPlay(false));

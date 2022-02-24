@@ -138,7 +138,7 @@ export default function Track({ trackId, color }: Props) {
     }
   }, [sourceParams, effectsParams, sourceNode, effectAudioModules]);
 
-  const startComposition = useCallback(() => {
+  const startComposer = useCallback(() => {
     Tone.Transport.start();
     if (composition?.pattern) {
       composition.pattern.start();
@@ -147,7 +147,7 @@ export default function Track({ trackId, color }: Props) {
     }
   }, [composition?.pattern]);
 
-  const stopComposition = useCallback(() => {
+  const stopComposer = useCallback(() => {
     if (composition?.pattern) {
       composition.pattern.stop();
     } else {
@@ -159,12 +159,12 @@ export default function Track({ trackId, color }: Props) {
   // Toggle composition playback
   useEffect(() => {
     if (playing) {
-      startComposition();
+      startComposer();
     } else {
-      stopComposition();
+      stopComposer();
       sourceNode?.releaseAll();
     }
-  }, [playing, startComposition, stopComposition, sourceNode]);
+  }, [playing, startComposer, stopComposer, sourceNode]);
 
   const triggerPatternNote = useCallback(
     (time, note) => {
@@ -196,13 +196,13 @@ export default function Track({ trackId, color }: Props) {
   // Continue playing pattern on change
   useEffect(() => {
     if (playing) {
-      startComposition();
+      startComposer();
     }
   }, [composition?.pattern]);
 
   const handleChangeComposition = (key: 'pattern', value: Pattern<string> | null) => {
     if (playing) {
-      stopComposition();
+      stopComposer();
       value?.dispose(); // is that right?
     }
     dispatch(setTrackCompositionComponent(trackId, key, value));
