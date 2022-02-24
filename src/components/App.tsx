@@ -48,8 +48,6 @@ const App = memo(() => {
   }, [tracksState]);
 
   const togglePlay = useCallback(() => {
-    Tone.start();
-    console.log('Tone.start()');
     if (!playing) {
       dispatch(setPlay(true));
     } else {
@@ -89,10 +87,17 @@ const App = memo(() => {
     'orange',
   ]);
 
+  function enableToneOnMobile() {
+    if (Tone.context.state !== 'running') {
+      Tone.context.resume();
+      console.log('Tone.context.resume()');
+    }
+  }
+
   return (
     <div className='app'>
       <div id='main-controls'>
-        <IconButton id='play-button' onClick={togglePlay}>
+        <IconButton id='play-button' onClick={togglePlay} onMouseDown={enableToneOnMobile}>
           {playing ? <RiStopFill /> : <RiPlayFill />}
         </IconButton>
         <div id='volume'>

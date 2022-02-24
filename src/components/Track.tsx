@@ -139,10 +139,9 @@ export default function Track({ trackId, color }: Props) {
   }, [sourceParams, effectsParams, sourceNode, effectAudioModules]);
 
   const startComposer = useCallback(() => {
-    sourceNode.context.resume();
-    console.log('sourceNode.context.resume()');
     Tone.Transport.start();
     if (composition?.pattern) {
+      console.log(composition.pattern.state);
       composition.pattern.start();
     } else {
       console.log('pattern not set!');

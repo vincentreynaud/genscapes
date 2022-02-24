@@ -8,9 +8,18 @@ type Props = {
   onClick?: any;
   size?: 'md' | 'sm';
   variant?: 'filled' | 'text';
+  onMouseDown?: Function;
 };
 
-export default function IconButton({ children, className, id, onClick, size = 'md', variant = 'text' }: Props) {
+export default function IconButton({
+  children,
+  className,
+  id,
+  onClick,
+  size = 'md',
+  variant = 'text',
+  onMouseDown = () => {},
+}: Props) {
   return (
     <button
       className={classNames(`icon-button d-flex align-items-center p-1 ${className}`, {
@@ -20,6 +29,7 @@ export default function IconButton({ children, className, id, onClick, size = 'm
       })}
       id={id}
       onClick={onClick}
+      onMouseDown={(e) => onMouseDown}
     >
       {children}
     </button>
