@@ -48,8 +48,9 @@ const App = memo(() => {
   }, [tracksState]);
 
   const togglePlay = useCallback(() => {
+    Tone.start();
+    console.log('Tone.start()');
     if (!playing) {
-      Tone.start();
       dispatch(setPlay(true));
     } else {
       dispatch(setPlay(false));
