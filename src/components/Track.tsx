@@ -4,8 +4,8 @@ import { Pattern, PolySynth, Tremolo } from 'tone';
 import { Scale } from '@tonaljs/tonal';
 import { nanoid } from '@reduxjs/toolkit';
 import find from 'lodash/find';
-import { RiVolumeDownFill } from '@react-icons/all-files/ri/RiVolumeDownFill.esm';
-import { IoMdClose } from '@react-icons/all-files/io/IoMdClose.esm';
+import { RiVolumeDownFill } from 'react-icons/ri';
+import { IoMdClose } from 'react-icons/io';
 
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
 import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam } from '../reducers/params';

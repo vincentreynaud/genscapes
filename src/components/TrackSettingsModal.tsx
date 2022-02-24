@@ -1,11 +1,11 @@
 import React from 'react';
-import { VscSettings } from '@react-icons/all-files/vsc/VscSettings.esm';
 import { Modal } from 'reactstrap';
 import TrackSettings from './TrackSettings';
 import { UpdateModuleParamHelper, UpdateTrackParamHelper } from '../types/params';
 import { useState } from 'react';
 import IconButton from './shared/IconButton';
-import { IoMdClose } from '@react-icons/all-files/io/IoMdClose.esm';
+import { IoMdClose } from 'react-icons/io';
+import { VscSettings } from 'react-icons/vsc';
 
 type Props = {
   trackId: number;

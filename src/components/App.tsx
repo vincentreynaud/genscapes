@@ -9,9 +9,7 @@ import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
 import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers';
 import '../styles/index.scss';
-import { RiPlayFill } from '@react-icons/all-files/ri/RiPlayFill.esm';
-import { RiStopFill } from '@react-icons/all-files/ri/RiStopFill.esm';
-import { RiAddFill } from '@react-icons/all-files/ri/RiAddFill.esm';
+import { RiPlayFill, RiStopFill, RiAddFill } from 'react-icons/ri';
 import IconButton from './shared/IconButton';
 
 const App = memo(() => {
