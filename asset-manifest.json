@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/genscape/static/css/main.aa851d9e.css",
-    "main.js": "/genscape/static/js/main.ff1e9d0b.js",
+    "main.js": "/genscape/static/js/main.fdedfef9.js",
     "static/js/787.3e52a4ac.chunk.js": "/genscape/static/js/787.3e52a4ac.chunk.js",
     "index.html": "/genscape/index.html",
     "main.aa851d9e.css.map": "/genscape/static/css/main.aa851d9e.css.map",
-    "main.ff1e9d0b.js.map": "/genscape/static/js/main.ff1e9d0b.js.map",
+    "main.fdedfef9.js.map": "/genscape/static/js/main.fdedfef9.js.map",
     "787.3e52a4ac.chunk.js.map": "/genscape/static/js/787.3e52a4ac.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.aa851d9e.css",
-    "static/js/main.ff1e9d0b.js"
+    "static/js/main.fdedfef9.js"
   ]
 }
