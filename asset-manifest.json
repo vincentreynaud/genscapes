@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/genscape/static/css/main.aa851d9e.css",
-    "main.js": "/genscape/static/js/main.f31cfc49.js",
-    "static/js/787.3e52a4ac.chunk.js": "/genscape/static/js/787.3e52a4ac.chunk.js",
-    "index.html": "/genscape/index.html",
-    "main.aa851d9e.css.map": "/genscape/static/css/main.aa851d9e.css.map",
-    "main.f31cfc49.js.map": "/genscape/static/js/main.f31cfc49.js.map",
-    "787.3e52a4ac.chunk.js.map": "/genscape/static/js/787.3e52a4ac.chunk.js.map"
+    "main.css": "/genscapes/static/css/main.aa851d9e.css",
+    "main.js": "/genscapes/static/js/main.2f2ac0f5.js",
+    "static/js/787.725d76e7.chunk.js": "/genscapes/static/js/787.725d76e7.chunk.js",
+    "index.html": "/genscapes/index.html",
+    "main.aa851d9e.css.map": "/genscapes/static/css/main.aa851d9e.css.map",
+    "main.2f2ac0f5.js.map": "/genscapes/static/js/main.2f2ac0f5.js.map",
+    "787.725d76e7.chunk.js.map": "/genscapes/static/js/787.725d76e7.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.aa851d9e.css",
-    "static/js/main.f31cfc49.js"
+    "static/js/main.2f2ac0f5.js"
   ]
 }
