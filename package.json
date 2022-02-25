@@ -1,9 +1,9 @@
 {
-  "name": "genscape",
+  "name": "genscapes",
   "version": "0.1.0",
   "private": false,
   "author": "Vincent Reynaud <mail@vincentreynaud.de>",
-  "homepage": "https://vincentreynaud.github.io/genscape",
+  "homepage": "https://vincentreynaud.github.io/genscapes",
   "description": "A browser app to create generative sound",
   "license": "MIT",
   "repository": {
