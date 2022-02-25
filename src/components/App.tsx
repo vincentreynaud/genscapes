@@ -12,6 +12,7 @@ import '../styles/index.scss';
 import { RiPlayFill, RiStopFill, RiAddFill } from 'react-icons/ri';
 import IconButton from './shared/IconButton';
 import * as Tone from 'tone';
+import { updateAudioState } from '../helpers/tone';
 
 const App = memo(() => {
   const dispatch = useAppDispatch();
@@ -33,12 +34,12 @@ const App = memo(() => {
   // ISSUE: probably does not update the entirety of the audio
   // need to create a system that creates
   useEffect(() => {
-    const value = getParamsFromUrl();
-    console.log(JSON.stringify(value));
-    if (!isTracksStateType(value)) {
+    const tracksParams = getParamsFromUrl();
+    if (!isTracksStateType(tracksParams)) {
       console.error("Prevented state update because the url query params structure differs from the app's state one");
     } else {
-      dispatch(updateAllParams({ value }));
+      updateAudioState(tracksParams);
+      dispatch(updateAllParams({ value: tracksParams }));
     }
   }, []);
 

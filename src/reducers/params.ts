@@ -41,7 +41,7 @@ const paramsSlice = createSlice({
     updateTrackParam: {
       reducer(state, action: PayloadAction<UpdateTrackParamPayload>) {
         const { trackId, path, value } = action.payload;
-        set(state.tracks[trackId].composition, path, value);
+        set(state.tracks[trackId].sequ, path, value);
       },
       prepare(payload: UpdateTrackParamPayload) {
         return { payload };

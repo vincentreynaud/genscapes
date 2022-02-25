@@ -41,6 +41,7 @@ import { toInteger } from 'lodash';
 import IconButton from './shared/IconButton';
 import TrackSettingsModal from './TrackSettingsModal';
 import CompositionUiMin from './modules/CompositionUiMin';
+import { setPattern } from '../helpers/tone';
 
 type Props = {
   trackId: number;
@@ -63,10 +64,10 @@ export default function Track({ trackId, color }: Props) {
   const effectsParams = useAppSelector(selectEffectsParams);
   const [changedParamsMod]: TrackState['signalChain'] = useWhatChanged([sourceParams, ...effectsParams]);
   const effectAudioModules = useAppSelector(selectEffectAudioModules);
-  const { signalChain: signalChainParams, composition: compositionParams } = trackParams;
-  const { notes } = compositionParams;
+  const { signalChain: signalChainParams, sequ: sequParams } = trackParams;
+  const { notes } = sequParams;
   const { scale } = notes;
-  const { composition } = trackAudio;
+  const { sequ } = trackAudio;
   const { playing } = globalParams;
   const { outputNode } = globalAudio;
   const {
@@ -76,6 +77,7 @@ export default function Track({ trackId, color }: Props) {
     tremoloOptions: { rate: modulationRate, amount: modulationAmount },
     rand: { detune: randDetune },
   } = sourceParams as any; // just to make it shut up for now
+  const [currentNoteTime, setCurrentNoteTime] = useState(0);
 
   const chainPolySynth = useCallback(
     (source, lfo) => {
@@ -140,24 +142,24 @@ export default function Track({ trackId, color }: Props) {
 
   const startComposer = useCallback(() => {
     Tone.Transport.start();
-    if (composition?.pattern) {
-      console.log(composition.pattern.state);
-      composition.pattern.start();
+    if (sequ?.pattern) {
+      console.log(sequ.pattern.state);
+      sequ.pattern.start();
     } else {
       console.log('pattern not set!');
     }
-  }, [composition?.pattern]);
+  }, [sequ?.pattern]);
 
   const stopComposer = useCallback(() => {
-    if (composition?.pattern) {
-      composition.pattern.stop();
+    if (sequ?.pattern) {
+      sequ.pattern.stop();
     } else {
       console.log('pattern not set!');
     }
     Tone.Transport.pause();
-  }, [composition?.pattern]);
+  }, [sequ?.pattern]);
 
-  // Toggle composition playback
+  // Toggle sequ playback
   useEffect(() => {
     if (playing) {
       startComposer();
@@ -167,39 +169,21 @@ export default function Track({ trackId, color }: Props) {
     }
   }, [playing, startComposer, stopComposer, sourceNode]);
 
-  const triggerPatternNote = useCallback(
-    (time, note) => {
-      const noteLength = getCurrentNoteLength(compositionParams);
-      const interval = getCurrentInterval(compositionParams);
-      const currentDetune = getCurrentDetune(detune, randDetune);
-      console.log(note, currentDetune, 'interval', interval, 'noteLength', noteLength);
-      sourceNode?.set({ detune: currentDetune });
-      sourceNode?.triggerAttackRelease(note, noteLength, time + interval);
-    },
-    [sourceNode, compositionParams, detune, randDetune]
-  );
-
   // Update pattern
   useEffect(() => {
-    console.log('init pattern');
-    const pattern = new Pattern({
-      callback: triggerPatternNote,
-      interval: getCurrentInterval(compositionParams),
-      values: scale,
-      pattern: 'random',
-    });
+    const pattern = setPattern(sourceNode, sequParams);
     handleChangeComposition('pattern', pattern);
     return () => {
       handleChangeComposition('pattern', null);
     };
-  }, [compositionParams, scale, triggerPatternNote]);
+  }, [sourceNode, sequParams]);
 
   // Continue playing pattern on change
   useEffect(() => {
     if (playing) {
       startComposer();
     }
-  }, [composition?.pattern]);
+  }, [sequ?.pattern]);
 
   const handleChangeComposition = (key: 'pattern', value: Pattern<string> | null) => {
     if (playing) {
@@ -217,8 +201,8 @@ export default function Track({ trackId, color }: Props) {
     handleChangeTrackParam('notes.scaleType', scaleType);
     handleChangeTrackParam('notes.scaleName', scaleName);
     handleChangeTrackParam('notes.scale', scale);
-    if (composition?.pattern) {
-      composition.pattern.set({ values: scale });
+    if (sequ?.pattern) {
+      sequ.pattern.set({ values: scale });
     }
   }
 
@@ -259,7 +243,7 @@ export default function Track({ trackId, color }: Props) {
             }
           })}
           <CompositionUiMin
-            params={compositionParams}
+            params={sequParams}
             onParamChange={handleChangeTrackParam}
             setCurrentScale={setCurrentScale}
           />

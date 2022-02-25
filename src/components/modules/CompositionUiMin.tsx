@@ -7,21 +7,21 @@ import Select from '../shared/Select';
 
 type Props = {
   onParamChange: UpdateTrackParamHelper;
-  params: TrackState['composition'];
+  params: TrackState['sequ'];
   setCurrentScale: any;
 };
 
 export default function CompositionUiMin({ params, onParamChange, setCurrentScale }: Props) {
   console.log(params);
   const { notes } = params;
-  const { composition: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
+  const { sequ: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
 
   const handleParamChange = (param) => (value: number) => {
     onParamChange(param, value);
   };
   return (
     <div className='col-auto'>
-      <h5 className='d-inline-block mb-2'>{MODULES_DISPLAY_NAMES_MAP['composition']}</h5>
+      <h5 className='d-inline-block mb-2'>{MODULES_DISPLAY_NAMES_MAP['sequ']}</h5>
       <span className='ms-2' id='notes-display'>
         {notes.scaleName && notes.scaleName}
       </span>

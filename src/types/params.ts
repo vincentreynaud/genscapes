@@ -10,7 +10,7 @@ export type GlobalParamsState = {
 export type ModuleName = EffectName | SourceName;
 export type ModuleType = 'source' | 'effect';
 export type ModuleField = 'options' | 'rand' | 'tremoloOptions';
-export type TrackField = 'composition' | 'notes';
+export type TrackField = 'sequ' | 'notes';
 export type TrackId = number;
 export type ModuleId = string;
 export type ModuleOptions = PartialEffectOptions | PartialSourceOptions;
@@ -47,7 +47,7 @@ export type TracksState = Record<number, TrackState>;
 
 export type TrackState = {
   signalChain: Array<SourceParamsModule | EffectParamsModule>;
-  composition: TrackCompositionState;
+  sequ: TrackCompositionState;
 };
 
 export type TrackCompositionState = {

@@ -28,7 +28,7 @@ export const EFFECT_NAMES_MAP = {
 export const MODULES_DISPLAY_NAMES_MAP = {
   polySynth: 'Oscillator',
   autoFilter: 'Auto Filter',
-  composition: 'Composer',
+  sequ: 'Composer',
 };
 
 export function getTrackParamsBoundaries() {
@@ -105,7 +105,7 @@ export function getTrackParamsBoundaries() {
         unit: 'Hz',
       },
     },
-    composition: {
+    sequ: {
       noteLength: {
         min: 0.2,
         max: 48,

@@ -50,7 +50,7 @@ export function initSourceState(): SourceParamsModule {
 export function initTrackState(): TrackState {
   return {
     signalChain: [initSourceState()],
-    composition: {
+    sequ: {
       notes: initNotes(),
       noteLength: 10,
       randNoteLength: 0.8,
@@ -74,7 +74,7 @@ export function initAudioState() {
 export function initTrackAudioState() {
   return {
     signalChain: [],
-    composition: {},
+    sequ: {},
   };
 }
 

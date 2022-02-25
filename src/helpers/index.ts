@@ -3,7 +3,13 @@ import toString from 'lodash/toString';
 import random from 'lodash/random';
 import round from 'lodash/round';
 import every from 'lodash/every';
-import { EffectParamsModule, SourceParamsModule, TracksState, TrackState } from '../types/params';
+import {
+  EffectParamsModule,
+  PolySynthParamsModule,
+  SourceParamsModule,
+  TracksState,
+  TrackState,
+} from '../types/params';
 
 export const pickRandomElement = (arr: any[] = []) => arr[random(0, arr.length - 1)];
 
@@ -24,13 +30,13 @@ export function calcRandom(value: number, randAmount: number) {
   return getAndFormatRandom(min, max);
 }
 
-export function getCurrentNoteLength(composition: TrackState['composition']) {
-  const { noteLength, randNoteLength } = composition;
+export function getCurrentNoteLength(sequ: TrackState['sequ']) {
+  const { noteLength, randNoteLength } = sequ;
   return calcRandom(noteLength, randNoteLength);
 }
 
-export function getCurrentInterval(composition: TrackState['composition']) {
-  const { interval, randInterval } = composition;
+export function getCurrentInterval(sequ: TrackState['sequ']) {
+  const { interval, randInterval } = sequ;
   return calcRandom(interval, randInterval);
 }
 
@@ -60,9 +66,9 @@ export function isTracksStateType(p: any): p is TracksState {
     return false;
   }
   const keys = Object.keys(p);
-  const areTracksCompoStateValid = keys.map((key) => p[key]?.composition?.noteLength !== undefined);
+  const areTracksCompoStateValid = keys.map((key) => p[key]?.sequ?.noteLength !== undefined);
   const areTracksNotesStateValid = keys.map((key) => {
-    return p[key]?.composition?.notes?.scaleName !== undefined;
+    return p[key]?.sequ?.notes?.scaleName !== undefined;
   });
   const checks = [...areTracksCompoStateValid, ...areTracksNotesStateValid];
   return every(checks, (check) => check === true);
@@ -70,4 +76,8 @@ export function isTracksStateType(p: any): p is TracksState {
 
 export function isSourceParamsModule(mod: SourceParamsModule | EffectParamsModule): mod is SourceParamsModule {
   return (mod as SourceParamsModule)?.type === 'source' && (mod as SourceParamsModule)?.tremoloOptions !== undefined;
+}
+
+export function isPolySynthParamsModule(mod: SourceParamsModule): mod is PolySynthParamsModule {
+  return isSourceParamsModule(mod) && mod.name === 'polySynth';
 }

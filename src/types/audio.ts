@@ -12,7 +12,7 @@ export type TrackAudioNodeType = 'synthNode' | 'synthLfoNode';
 
 export type TrackAudio = {
   signalChain: Array<AudioModule>; // this is the one that is used for chaining Tone components
-  composition?: {
+  sequ?: {
     pattern?: Pattern<string>;
   };
 };

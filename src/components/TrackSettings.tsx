@@ -31,7 +31,7 @@ export default function TrackSettings({
   const effectsParams = useAppSelector((state) => selectEffectsParams(state));
 
   const trackParams = useAppSelector((state) => selectTrackParams(state));
-  const { composition: compositionParams } = trackParams;
+  const { sequ: sequParams } = trackParams;
 
   return (
     <div className='track-settings'>
@@ -47,11 +47,7 @@ export default function TrackSettings({
       </section>
       <section className='container-fluid'>
         <div className='row'>
-          <Composition
-            onParamChange={onTrackParamChange}
-            params={compositionParams}
-            setCurrentScale={setCurrentScale}
-          />
+          <Composition onParamChange={onTrackParamChange} params={sequParams} setCurrentScale={setCurrentScale} />
         </div>
       </section>
     </div>

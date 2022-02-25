@@ -19,14 +19,14 @@ type State = {
 
 const Composition = ({ params, onParamChange, setCurrentScale }: State) => {
   const { notes } = params;
-  const { composition: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
+  const { sequ: boundaries } = useMemo(() => getTrackParamsBoundaries(), []);
 
   const handleParamChange = (param) => (value: number) => {
     onParamChange(param, value);
   };
 
   return (
-    <ModuleWrapper id='composition-module' title={MODULES_DISPLAY_NAMES_MAP['composition']}>
+    <ModuleWrapper id='sequ-module' title={MODULES_DISPLAY_NAMES_MAP['sequ']}>
       <div className='container-fluid px-0'>
         <div className='row'>
           <div className='col-auto'>

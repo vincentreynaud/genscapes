@@ -1,5 +1,6 @@
 import { filter } from 'lodash';
 import { createSelector } from 'reselect';
+import { getModsByType } from '../helpers/tone';
 import { RootState } from '../store';
 import { ToneSignalNode, ToneSourceNode } from '../types/audio';
 import { ModuleType } from '../types/params';
@@ -14,7 +15,7 @@ export const selectGlobalParams = (state: RootState) => state.params.global;
 export const selectGlobalAudio = (state: RootState) => state.audio.global;
 
 export const makeSelectParamModuleByType = (trackId: number, type: ModuleType) =>
-  createSelector(selectTracksParams, (tracks) => filter(tracks[trackId].signalChain, (mod) => mod.type === type));
+  createSelector(selectTracksParams, (tracks) => getModsByType(tracks[trackId], type));
 
 export const makeSelectAudioModuleByType = (trackId: number, type: ModuleType) =>
   createSelector(selectTracksAudio, (tracks) => filter(tracks[trackId].signalChain, (mod) => mod.type === type));

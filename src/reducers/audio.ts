@@ -55,7 +55,7 @@ const audioSlice = createSlice({
       reducer(state, action: PayloadAction<SetTrackCompositionComponentPayload>) {
         const { trackId, type, value } = action.payload;
         // find if there is already audio for this trackId
-        state.tracks[trackId].composition = { [type]: value };
+        state.tracks[trackId].sequ = { [type]: value };
       },
       prepare(trackId: number, type: 'pattern', value: Pattern<string> | null) {
         return {
