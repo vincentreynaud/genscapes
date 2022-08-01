@@ -17,12 +17,16 @@ export function getOctaves() {
   return range(1, 8);
 }
 
-export const EFFECT_IDS = ['autoFilter', 'reverb', 'delay'];
+export const EFFECT_IDS = [
+  'autoFilter',
+  // 'reverb',
+  // 'delay'
+];
 
 export const EFFECT_NAMES_MAP = {
   autoFilter: 'Auto Filter',
-  reverb: 'Reverb',
-  delay: 'Delay',
+  // reverb: 'Reverb',
+  // delay: 'Delay',
 };
 
 export const MODULES_DISPLAY_NAMES_MAP = {
@@ -160,3 +164,5 @@ export const mapEffectNameToInitialState = (): Record<EffectName, EffectParamsMo
     delay: initialDelayState,
   };
 };
+
+export const trackColors = ['green', 'blue', 'purple', 'pink', 'yellow', 'red', 'indigo', 'teal', 'cyan', 'orange'];

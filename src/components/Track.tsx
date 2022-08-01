@@ -252,7 +252,8 @@ export default function Track({ trackId, color }: Props) {
           <div className='container-fluid p-0'>
             <div className='row gx-2 align-items-center'>
               <div className='col-auto me-1'>
-                <SliderInput
+                {/* Hidden until functionality is built */}
+                {/* <SliderInput
                   label={<RiVolumeDownFill />}
                   min={boundaries.volume.min}
                   max={boundaries.volume.max}
@@ -260,7 +261,7 @@ export default function Track({ trackId, color }: Props) {
                   unit={boundaries.volume.unit}
                   value={toInteger(trackVolume)}
                   onChange={setTrackVolume}
-                />
+                /> */}
               </div>
               <div className='col-auto'>
                 <TrackSettingsModal
