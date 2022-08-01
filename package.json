@@ -14,8 +14,8 @@
     "url": "https://github.com/vincentreynaud/genscape/issues"
   },
   "scripts": {
-    "start": "export NODE_OPTIONS=--openssl-legacy-provider; react-scripts start",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider; react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -b gh-pages -d build",
     "test": "react-scripts test",
