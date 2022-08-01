@@ -1,5 +1,3 @@
-# Soundscape maker app
+# Genscapes
 
-## Developer definitions
-
-Modules: they can be either an audio source or audio effect
+⚠️ The app is currently under development
