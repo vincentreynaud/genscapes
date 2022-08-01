@@ -3,7 +3,7 @@ import { Gain } from 'tone';
 import toNumber from 'lodash/toNumber';
 import RangeInput from './shared/RangeInput';
 import Track from './Track';
-import { addTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
+import { addTrack, deleteTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
 import { addTrack as addTrackAudio, setGlobalAudioComponent } from '../reducers/audio';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
@@ -13,6 +13,7 @@ import { RiPlayFill, RiStopFill, RiAddFill } from 'react-icons/ri';
 import IconButton from './shared/IconButton';
 import * as Tone from 'tone';
 import { updateAudioState } from '../helpers/tone';
+import { trackColors } from '../lib/constants';
 
 const App = memo(() => {
   const dispatch = useAppDispatch();
@@ -31,8 +32,7 @@ const App = memo(() => {
   }, []);
 
   // update params state from url query
-  // ISSUE: probably does not update the entirety of the audio
-  // need to create a system that creates
+  // plan to create a system that builds the entire audio graph based on parameters
   useEffect(() => {
     const tracksParams = getParamsFromUrl();
     if (!isTracksStateType(tracksParams)) {
@@ -56,7 +56,7 @@ const App = memo(() => {
     }
   }, [playing, dispatch]);
 
-  // Change master volume
+  // change master volume
   useEffect(() => {
     if (outputNode) {
       outputNode.set({ gain: volume });
@@ -75,18 +75,12 @@ const App = memo(() => {
     dispatch(addTrack(id));
   }
 
-  const [colors, setColors] = useState([
-    'green',
-    'blue',
-    'purple',
-    'pink',
-    'yellow',
-    'red',
-    'indigo',
-    'teal',
-    'cyan',
-    'orange',
-  ]);
+  function handleDeleteTrack(id: number) {
+    dispatch(addTrackAudio(id));
+    dispatch(deleteTrack(id));
+  }
+
+  const [colors, setColors] = useState(trackColors);
 
   function enableToneOnMobile() {
     if (Tone.context.state !== 'running') {
@@ -120,15 +114,3 @@ const App = memo(() => {
 });
 
 export default App;
-
-// find why to do this...?
-// const latestTrackParams = useRef(trackParams);
-// useEffect(() => {
-//   latestTrackParams.current = trackParams;
-// }, [trackParams]);
-
-// window.addEventListener('keydown', (e: KeyboardEvent) => {
-//   if (e.key === ' ') {
-//     togglePlay();
-//   }
-// });

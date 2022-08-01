@@ -7,6 +7,7 @@
 .vscode
 
 /src/experiments
+/notes.md
 
 # testing
 /coverage
