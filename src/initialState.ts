@@ -2,7 +2,13 @@ import { nanoid } from '@reduxjs/toolkit';
 import { Scale } from '@tonaljs/tonal';
 import { Synth } from 'tone';
 import { getNoteNames, getOctaves, getScaleTypes } from './lib/constants';
-import { AutoFilterParamsModule, EffectParamsModule, SourceParamsModule, TrackState } from './types/params';
+import {
+  AutoFilterParamsModule,
+  EffectParamsModule,
+  ParamsState,
+  SourceParamsModule,
+  TrackState,
+} from './types/params';
 import { pickRandomElement } from './helpers';
 import { AudioState } from './types/audio';
 
@@ -78,7 +84,7 @@ export function initTrackAudioState() {
   };
 }
 
-export function initParamsState() {
+export function initParamsState(): ParamsState {
   return {
     global: {
       playing: false,

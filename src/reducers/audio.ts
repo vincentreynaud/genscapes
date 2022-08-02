@@ -1,7 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { find } from 'lodash';
 import { Gain, Pattern, PolySynth } from 'tone';
 import { initAudioState, initTrackAudioState } from '../initialState';
-import { AudioModule } from '../types/audio';
+import { AudioModule, AudioState } from '../types/audio';
+import { TrackId } from '../types/params';
 import { KeyValuePair } from '../types/shared';
 
 const initialState = initAudioState();
@@ -39,11 +41,20 @@ const audioSlice = createSlice({
     addTrack(state, action: PayloadAction<number>) {
       state.tracks[action.payload] = initTrackAudioState();
     },
+    deleteTrack(state, action: PayloadAction<TrackId>) {
+      const sourceMod = find(state.tracks[action.payload]?.signalChain, (mod) => mod.type === 'source');
+      console.log(sourceMod);
+      sourceMod?.toneNode.disconnect();
+      delete state.tracks[action.payload];
+    },
     chainTrackAudioComponent: {
       reducer(state, action: PayloadAction<ChainTrackAudioComponentPayload>) {
         const { trackId, value } = action.payload;
-        // find if there is already audio for this trackId?
-        state.tracks[trackId].signalChain.push(value);
+        if (state.tracks[trackId]) {
+          state.tracks[trackId].signalChain.push(value);
+        } else {
+          console.log(`track ${trackId} doesn't exist`);
+        }
       },
       prepare(trackId, value) {
         return {
@@ -54,8 +65,11 @@ const audioSlice = createSlice({
     setTrackCompositionComponent: {
       reducer(state, action: PayloadAction<SetTrackCompositionComponentPayload>) {
         const { trackId, type, value } = action.payload;
-        // find if there is already audio for this trackId
-        state.tracks[trackId].sequ = { [type]: value };
+        if (state.tracks[trackId]) {
+          state.tracks[trackId].sequ = { [type]: value };
+        } else {
+          console.log(`track ${trackId} doesn't exist`);
+        }
       },
       prepare(trackId: number, type: 'pattern', value: Pattern<string> | null) {
         return {
@@ -68,6 +82,12 @@ const audioSlice = createSlice({
 
 const { actions, reducer } = audioSlice;
 
-export const { addTrack, chainTrackAudioComponent, setTrackCompositionComponent, setGlobalAudioComponent } = actions;
+export const {
+  addTrack,
+  deleteTrack,
+  chainTrackAudioComponent,
+  setTrackCompositionComponent,
+  setGlobalAudioComponent,
+} = actions;
 
 export default reducer;

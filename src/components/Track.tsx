@@ -8,8 +8,12 @@ import { RiVolumeDownFill } from 'react-icons/ri';
 import { IoMdClose } from 'react-icons/io';
 
 import { useAppSelector, useAppDispatch, useWhatChanged } from '../hooks';
-import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam } from '../reducers/params';
-import { chainTrackAudioComponent, setTrackCompositionComponent } from '../reducers/audio';
+import { updateModuleParam as updateModuleParam, addEffect, updateTrackParam, deleteTrack } from '../reducers/params';
+import {
+  chainTrackAudioComponent,
+  deleteTrack as deleteTrackAudio,
+  setTrackCompositionComponent,
+} from '../reducers/audio';
 import {
   makeSelectAudioModuleByType,
   makeSelectParamModuleByType,
@@ -21,27 +25,19 @@ import {
   SelectSourceNodes,
 } from '../selectors';
 import {
-  clearDoubleHashes,
-  getCurrentDetune,
-  getCurrentInterval,
-  getCurrentNoteLength,
-  isSourceParamsModule,
-} from '../helpers';
-import { EffectName, TrackState, UpdateModuleParamHelper, UpdateTrackParamHelper } from '../types/params';
-import {
   getTrackParamsBoundaries,
   mapEffectNameToInitialState,
   mapEffectNameToToneComponent,
   mapEffectNameToUiMinComponent,
 } from '../lib/constants';
-import '../styles/index.scss';
 import PolySynthUiMin from './modules/PolySynthUiMin';
-import SliderInput from './shared/SliderInput';
-import { toInteger } from 'lodash';
-import IconButton from './shared/IconButton';
-import TrackSettingsModal from './TrackSettingsModal';
 import CompositionUiMin from './modules/CompositionUiMin';
+import TrackSettingsModal from './TrackSettingsModal';
+import IconButton from './shared/IconButton';
+import { clearDoubleHashes, isSourceParamsModule } from '../helpers';
 import { setPattern } from '../helpers/tone';
+import { EffectName, TrackState, UpdateModuleParamHelper, UpdateTrackParamHelper } from '../types/params';
+import '../styles/index.scss';
 
 type Props = {
   trackId: number;
@@ -133,7 +129,7 @@ export default function Track({ trackId, color }: Props) {
       }
     } else {
       const effectMod = find(effectAudioModules, (node) => node.id === changedParamsMod?.id);
-      if (effectMod) {
+      if (effectMod !== undefined) {
         console.log('updating effect node', changedParamsMod);
         effectMod.toneNode.set(changedParamsMod.options || {});
       }
@@ -226,7 +222,13 @@ export default function Track({ trackId, color }: Props) {
     [dispatch, sourceNode, effectNodes, outputNode]
   );
 
-  const handleDeleteEffect = (effectName: string) => {};
+  // todo!
+  function handleDeleteEffect(effectName: string) {}
+
+  function handleDeleteTrack(id: number) {
+    dispatch(deleteTrackAudio(id));
+    dispatch(deleteTrack(id));
+  }
 
   const [trackVolume, setTrackVolume] = useState(0.5);
 
@@ -274,7 +276,7 @@ export default function Track({ trackId, color }: Props) {
                 />
               </div>
               <div className='col-auto'>
-                <IconButton>
+                <IconButton onClick={() => handleDeleteTrack(trackId)}>
                   <IoMdClose />
                 </IconButton>
               </div>

@@ -3,8 +3,8 @@ import { Gain } from 'tone';
 import toNumber from 'lodash/toNumber';
 import RangeInput from './shared/RangeInput';
 import Track from './Track';
-import { addTrack, deleteTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
-import { addTrack as addTrackAudio, setGlobalAudioComponent } from '../reducers/audio';
+import { addTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
+import { addTrack as addTrackAudio, deleteTrack as deleteTrackAudio, setGlobalAudioComponent } from '../reducers/audio';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
 import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers';
@@ -22,8 +22,9 @@ const App = memo(() => {
   const tracksState = useAppSelector(selectTracksParams);
   const { playing, volume } = globalParams;
   const { outputNode } = globalAudio;
-
+  const [nextTrackId, setNextTrackId] = useState(Object.keys(tracksState).length);
   const tracksIds = Object.keys(tracksState).map((id) => toNumber(id));
+  const [colors, setColors] = useState(trackColors);
 
   // init component
   useEffect(() => {
@@ -31,7 +32,7 @@ const App = memo(() => {
     dispatch(setGlobalAudioComponent('outputNode', outputNode));
   }, []);
 
-  // update params state from url query
+  // [!] Buggy: update params state from url query
   // plan to create a system that builds the entire audio graph based on parameters
   useEffect(() => {
     const tracksParams = getParamsFromUrl();
@@ -65,26 +66,22 @@ const App = memo(() => {
     }
   }, [outputNode, volume]);
 
-  const handleChangeGlobalParam = (value: number) => {
+  function handleChangeGlobalParam(value: number) {
     dispatch(setGlobalParam('volume', value));
-  };
+  }
 
   function handleAddTrack() {
-    const id = Object.keys(tracksState).length;
+    const id = nextTrackId;
+    setNextTrackId(nextTrackId + 1);
     dispatch(addTrackAudio(id));
     dispatch(addTrack(id));
   }
 
-  function handleDeleteTrack(id: number) {
-    dispatch(addTrackAudio(id));
-    dispatch(deleteTrack(id));
-  }
-
-  const [colors, setColors] = useState(trackColors);
-
+  // WIP
   function enableToneOnMobile() {
     if (Tone.context.state !== 'running') {
       Tone.context.resume();
+      // Tone.start();
       console.log('Tone.context.resume()');
     }
   }

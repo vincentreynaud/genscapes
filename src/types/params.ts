@@ -1,6 +1,10 @@
 import { AutoFilterOptions, EnvelopeCurve, PolySynthOptions, Synth } from 'tone';
 import { Time } from 'tone/build/esm/core/type/Units';
-import { RecursivePartial } from 'tone/build/esm/core/util/Interface';
+
+export type ParamsState = {
+  global: GlobalParamsState;
+  tracks: TracksState;
+};
 
 export type GlobalParamsState = {
   playing: boolean;
