@@ -88,6 +88,9 @@ const App = memo(() => {
 
   return (
     <div className='app'>
+      <div id='github-link'>
+        <a href='https://github.com/vincentreynaud/genscapes'>See Github Repository</a>
+      </div>
       <div id='main-controls'>
         <IconButton id='play-button' onClick={togglePlay} onMouseDown={enableToneOnMobile}>
           {playing ? <RiStopFill /> : <RiPlayFill />}
