@@ -129,9 +129,9 @@ export function getTrackParamsBoundaries() {
         unit: '%',
       },
       randInterval: {
-        min: 0.2,
-        max: 48,
-        step: 0.1,
+        min: 0,
+        max: 1,
+        step: 0.01,
         unit: '%',
       },
     },
