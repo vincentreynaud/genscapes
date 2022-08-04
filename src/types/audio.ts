@@ -23,4 +23,4 @@ export interface AudioModule extends ModuleBaseState {
 export type ToneSignalNode = ToneSourceNode | ToneEffectNode;
 export type ToneEffectNode = LFO | AutoFilter | Tremolo | Gain;
 export type ToneSourceNode = PolySynth;
-export type ToneAudioEffect = typeof AutoFilter | typeof Reverb | typeof Delay;
+export type ToneAudioEffect = typeof AutoFilter | typeof Reverb | typeof Delay | typeof Tremolo;

@@ -19,7 +19,7 @@ export type TrackId = number;
 export type ModuleId = string;
 export type ModuleOptions = PartialEffectOptions | PartialSourceOptions;
 export type ModuleRandParams = SourceRandParams;
-export type EffectName = 'autoFilter' | 'reverb' | 'delay';
+export type EffectName = 'autoFilter' | 'reverb' | 'delay' | 'tremolo';
 export type SourceName = 'oscillator' | 'synth' | 'polySynth';
 export type PartialEffectOptions = Partial<AutoFilterOptions>;
 export type SourceOptions = PolySynthOptions<Synth>;
@@ -29,7 +29,7 @@ export type SourceRandParams = { detune: number };
 export interface ModuleBaseState {
   name: ModuleName;
   type: ModuleType;
-  id?: string;
+  id?: string; // this should not be optional so i don't have to check for it in other parts of the code
 }
 
 export interface ParamsModule<Options, Rand = {}> extends ModuleBaseState {

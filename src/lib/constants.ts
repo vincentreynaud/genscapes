@@ -1,5 +1,5 @@
 import range from 'lodash/range';
-import { AutoFilter, Delay, Reverb } from 'tone';
+import { AutoFilter, Delay, Reverb, Tremolo } from 'tone';
 import { Note, Scale } from '@tonaljs/tonal';
 import { initAutoFilterState, initialDelayState, initialReverbState } from '../initialState';
 import AutoFilterUi from '../components/modules/AutoFilterUi';
@@ -142,11 +142,11 @@ type EffectUiComponent = typeof AutoFilterUi;
 type EffectUiMinComponent = typeof AutoFilterUiMin;
 
 export const mapEffectNameToUiComponent = (): Record<EffectName, EffectUiComponent> => {
-  return { autoFilter: AutoFilterUi, reverb: AutoFilterUi, delay: AutoFilterUi };
+  return { autoFilter: AutoFilterUi, reverb: AutoFilterUi, delay: AutoFilterUi, tremolo: AutoFilterUi };
 };
 
 export const mapEffectNameToUiMinComponent = (): Record<EffectName, EffectUiMinComponent> => {
-  return { autoFilter: AutoFilterUiMin, reverb: AutoFilterUiMin, delay: AutoFilterUiMin };
+  return { autoFilter: AutoFilterUiMin, reverb: AutoFilterUiMin, delay: AutoFilterUiMin, tremolo: AutoFilterUiMin };
 };
 
 export const mapEffectNameToToneComponent = (): Record<EffectName, ToneAudioEffect> => {
@@ -154,6 +154,7 @@ export const mapEffectNameToToneComponent = (): Record<EffectName, ToneAudioEffe
     autoFilter: AutoFilter,
     reverb: Reverb,
     delay: Delay,
+    tremolo: Tremolo,
   };
 };
 
@@ -162,6 +163,7 @@ export const mapEffectNameToInitialState = (): Record<EffectName, EffectParamsMo
     autoFilter: initAutoFilterState(),
     reverb: initialReverbState,
     delay: initialDelayState,
+    tremolo: initialReverbState, // placeholder
   };
 };
 

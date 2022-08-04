@@ -4,7 +4,12 @@ import toNumber from 'lodash/toNumber';
 import RangeInput from './shared/RangeInput';
 import Track from './Track';
 import { addTrack, setGlobalParam, setPlay, updateAllParams } from '../reducers/params';
-import { addTrack as addTrackAudio, deleteTrack as deleteTrackAudio, setGlobalAudioComponent } from '../reducers/audio';
+import {
+  addTrack as addTrackAudio,
+  chainTrackAudioComponent,
+  deleteTrack as deleteTrackAudio,
+  setGlobalAudioComponent,
+} from '../reducers/audio';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { selectGlobalAudio, selectGlobalParams, selectTracksParams } from '../selectors';
 import { getParamsFromUrl, isTracksStateType, updateUrlQuery } from '../helpers';
@@ -26,23 +31,25 @@ const App = memo(() => {
   const tracksIds = Object.keys(tracksState).map((id) => toNumber(id));
   const [colors, setColors] = useState(trackColors);
 
+  const updateAudioFromUrlQuery = useCallback(
+    (outputNode) => {
+      const tracksParams = getParamsFromUrl();
+      if (!isTracksStateType(tracksParams)) {
+        console.error("Prevented state update because the url query params structure differs from the app's state one");
+      } else {
+        updateAudioState(tracksParams, outputNode, chainTrackAudioComponent);
+        dispatch(updateAllParams({ value: tracksParams }));
+      }
+    },
+    [dispatch, updateAllParams]
+  );
+
   // init component
   useEffect(() => {
     const outputNode = new Gain(volume).toDestination();
     dispatch(setGlobalAudioComponent('outputNode', outputNode));
-  }, []);
-
-  // [!] Buggy: update params state from url query
-  // plan to create a system that builds the entire audio graph based on parameters
-  useEffect(() => {
-    const tracksParams = getParamsFromUrl();
-    if (!isTracksStateType(tracksParams)) {
-      console.error("Prevented state update because the url query params structure differs from the app's state one");
-    } else {
-      updateAudioState(tracksParams);
-      dispatch(updateAllParams({ value: tracksParams }));
-    }
-  }, []);
+    updateAudioFromUrlQuery(outputNode);
+  }, [updateAudioFromUrlQuery]);
 
   // update url query on params change
   useEffect(() => {

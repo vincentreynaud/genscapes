@@ -35,7 +35,7 @@ import CompositionUiMin from './modules/CompositionUiMin';
 import TrackSettingsModal from './TrackSettingsModal';
 import IconButton from './shared/IconButton';
 import { clearDoubleHashes, isSourceParamsModule } from '../helpers';
-import { setPattern } from '../helpers/tone';
+import { createAudioModule, setPattern } from '../helpers/tone';
 import { EffectName, TrackState, UpdateModuleParamHelper, UpdateTrackParamHelper } from '../types/params';
 import '../styles/index.scss';
 
@@ -72,22 +72,16 @@ export default function Track({ trackId, color }: Props) {
     },
     tremoloOptions: { rate: modulationRate, amount: modulationAmount },
     rand: { detune: randDetune },
-  } = sourceParams as any; // just to make it shut up for now
+  } = sourceParams as any; // mute it for now
   const [currentNoteTime, setCurrentNoteTime] = useState(0);
 
   const chainPolySynth = useCallback(
     (source, lfo) => {
       source.chain(lfo, outputNode);
+      const synthModule = createAudioModule('polySynth', 'source', sourceParams.id!, source);
+      const lfoModule = createAudioModule('tremolo', 'effect', sourceParams.id!, lfo);
 
-      const synthModule = {
-        name: 'polySynth',
-        type: 'source',
-        id: sourceParams.id,
-        toneNode: source,
-      };
-      const lfoModule = { name: 'tremolo', type: 'effect', id: sourceParams.id, toneNode: lfo };
-
-      // TODO: RESET SIGNAL CHAIN ON NEW SOURCE SET UP
+      // TODO: reset signal chain on new source setup
       dispatch(chainTrackAudioComponent(trackId, synthModule));
       dispatch(chainTrackAudioComponent(trackId, lfoModule));
       console.log('initialised polySynth');

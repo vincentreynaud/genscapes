@@ -1,9 +1,19 @@
-import { filter } from 'lodash';
-import { Pattern, PolySynth, Tremolo } from 'tone';
+import { filter, toNumber } from 'lodash';
+import { Gain, Pattern, PolySynth, Tremolo } from 'tone';
 import { calcRandom as calcRand, isPolySynthParamsModule, isSourceParamsModule } from '.';
-import { ToneSignalNode } from '../types/audio';
-import { TrackCompositionState, TracksState, TrackState } from '../types/params';
+import { AudioModule, ToneSignalNode, ToneSourceNode } from '../types/audio';
+import {
+  ModuleId,
+  ModuleName,
+  ModuleType,
+  PolySynthParamsModule,
+  TrackCompositionState,
+  TracksState,
+  TrackState,
+} from '../types/params';
 import * as Tone from 'tone';
+import { addTrack, chainTrackAudioComponent } from '../reducers/audio';
+import store from '../store';
 
 export function getModsByType(track: TrackState, type) {
   const mods = filter(track.signalChain, (mod) => mod.type === type);
@@ -23,6 +33,44 @@ export function createPolySynth(synthOpts, modOpts) {
   return source;
 }
 
+export function createPolySynthAudioFromParams(params: PolySynthParamsModule, out) {
+  const source = createPolySynth(params.options, params.tremoloOptions).connect(out);
+  return source;
+}
+
+export function createAudioModule(name: ModuleName, type: ModuleType, id: ModuleId, toneNode): AudioModule {
+  return { name, type, id, toneNode };
+}
+
+export function setCompoFromParams(params: PolySynthParamsModule, compoParams, source: ToneSourceNode) {
+  const { detune } = params?.options?.options as any;
+  const randDetune = params.rand?.detune;
+  const compo = setPattern(source, { ...compoParams, detune, randDetune });
+  return compo;
+}
+
+// [!] need for thunk implementation
+export function updateAudioState(tracks: TracksState, out: Gain<'gain'>, chain: typeof chainTrackAudioComponent) {
+  const state = store.getState();
+  const trackIds = Object.keys(tracks);
+  trackIds.forEach((key) => {
+    if (!state.audio.tracks[key]) {
+      store.dispatch(addTrack(toNumber(key)));
+    }
+    let source: ToneSignalNode | null = null;
+    const [sourceParams]: any[] = getModsByType(tracks[key], 'source');
+    if (sourceParams && isPolySynthParamsModule(sourceParams)) {
+      const { name, type, id } = sourceParams;
+      // if source already exists, disconnect it + replace it
+      source = createPolySynthAudioFromParams(sourceParams, out);
+      setCompoFromParams(sourceParams, tracks[key].sequ, source);
+      const mod = createAudioModule(name, type, id!, source);
+      store.dispatch(chain(key, mod));
+    }
+    // same for effects
+  });
+}
+
 export function startComposer(compo) {
   console.log(Tone.Transport.context.state);
   if (Tone.Transport.context.state !== 'running') {
@@ -40,33 +88,19 @@ export function stopComposer(compo) {
   Tone.Transport.pause();
 }
 
-export function updateAudioState(tracks: TracksState) {
-  const trackIds = Object.keys(tracks);
-  trackIds.forEach((key) => {
-    let source: ToneSignalNode | null = null;
-    const [sourceParams]: any[] = getModsByType(tracks[key], 'source');
-    if (sourceParams && isPolySynthParamsModule(sourceParams)) {
-      const { detune } = sourceParams.options.options as any;
-      const randDetune = sourceParams.rand?.detune;
-      const compoParams = tracks[key].sequ;
-      source = createPolySynth(sourceParams.options, sourceParams.tremoloOptions);
-      // .connect(out);
-      // assuming we now have a source
-      const compo = setPattern(source, { ...compoParams, detune, randDetune });
-      // audio.push({ source, compo });
-    }
-  });
-}
-
 function triggerPatternNote(source, params) {
   const { noteLength, randNoteLength, interval, randInterval, detune, randDetune } = params;
   return (time, note) => {
     const length = calcRand(noteLength, randNoteLength);
     const intr = calcRand(interval, randInterval);
     const currentDetune = calcRand(detune, randDetune);
-    source.set({ detune: currentDetune });
-    source.triggerAttackRelease(note, length, time + intr);
-    console.log(note, 'interval', intr, 'noteLength', length);
+    if (source) {
+      source.set({ detune: currentDetune });
+      source.triggerAttackRelease(note, length, time + intr);
+      console.log(note, 'interval', intr, 'noteLength', length);
+    } else {
+      console.error(`source is ${typeof source}`);
+    }
     // cb(time + intr);
   };
 }
