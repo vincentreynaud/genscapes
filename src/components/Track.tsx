@@ -131,6 +131,7 @@ export default function Track({ trackId, color }: Props) {
   }, [sourceParams, effectsParams, sourceNode, effectAudioModules]);
 
   const startComposer = useCallback(() => {
+    Tone.start();
     Tone.Transport.start();
     if (sequ?.pattern) {
       console.log(sequ.pattern.state);
