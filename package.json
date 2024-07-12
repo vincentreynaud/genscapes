@@ -2,16 +2,16 @@
   "name": "genscapes",
   "version": "0.9.0",
   "private": false,
-  "author": "Vincent Reynaud <mail@vincentreynaud.de>",
+  "author": "Vincent Reynaud <mail@vincentreynaud.digital>",
   "homepage": "https://vincentreynaud.github.io/genscapes",
-  "description": "A browser app to create drone music",
+  "description": "A browser app to generate drone music",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vincentreynaud/genscape/"
+    "url": "https://github.com/vincentreynaud/genscapes/"
   },
   "bugs": {
-    "url": "https://github.com/vincentreynaud/genscape/issues"
+    "url": "https://github.com/vincentreynaud/genscapes/issues"
   },
   "scripts": {
     "start": "react-scripts start -p 3005",
