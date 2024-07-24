@@ -35,7 +35,7 @@ export default function TrackSettings({
 
   return (
     <div className='track-settings'>
-      <section className='container-fluid'>
+      <section className='container-fluid ps-5'>
         <div className='row'>
           <PolySynth onParamChange={onModuleParamChange} params={sourceParams as PolySynthParamsModule} />
           {effectsParams.map((effect, i) => {
@@ -45,7 +45,7 @@ export default function TrackSettings({
           <AddButton onAdd={onAddEffect} />
         </div>
       </section>
-      <section className='container-fluid'>
+      <section className='container-fluid ps-5'>
         <div className='row'>
           <Composition onParamChange={onTrackParamChange} params={sequParams} setCurrentScale={setCurrentScale} />
         </div>

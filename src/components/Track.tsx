@@ -229,7 +229,7 @@ export default function Track({ trackId, color }: Props) {
 
   return (
     <>
-      <div id={`track-${trackId}`} className={`container-fluid ${color}`}>
+      <div id={`track-${trackId}`} className={`container-fluid ps-3 ${color}`}>
         <div className='row'>
           {signalChainParams.map((mod, i) => {
             if (isSourceParamsModule(mod)) {

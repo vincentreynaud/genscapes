@@ -55,13 +55,21 @@ a {
 .app {
   height: 100vh;
   position: relative;
-}
 
-#github-link {
-  text-align: right;
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
+  #instructions {
+    position: absolute;
+    top: 10svh;
+    left: 50%;
+    transform: translateX(-50%);
+    color: $white;
+    z-index: -1;
+  }
+  #github-link {
+    text-align: right;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+  }
 }
 
 #main-controls {
@@ -91,6 +99,7 @@ a {
   height: calc(100vh - #{$main-controls-height});
   display: flex;
   flex-flow: column-reverse;
+  z-index: 100;
 }
 
 #body {
@@ -230,6 +239,7 @@ span.control-value {
       -ms-transition: none;
       -o-transition: none;
       transition: none;
+      background-color: $primary;
     }
   }
 
@@ -238,18 +248,13 @@ span.control-value {
   }
 }
 
-// because i didn't manage to overwrite bootstrap's primary 😡
-div[id^='track-'] .bg-primary,
-.modal .bg-primary {
-  background-color: $primary !important;
-}
-
 div[id^='track-'] {
   padding: map-get($spacers, 2);
   padding-right: 8rem;
   position: relative;
   border-bottom: $track-border;
-  backdrop-filter: brightness(120%);
+  backdrop-filter: brightness(130%) blur(12px);
+  z-index: 100;
 
   &:nth-last-child(2) {
     border-top: $track-border;

@@ -64,7 +64,7 @@ export default function SliderInput({
             onChange={handleInput}
           />
           <span className='slider-value'>{formatValue(value, unit)}</span>
-          <Progress className='slider-progress' color='primary' value={(value * 100) / (max - min)} />
+          <Progress className='slider-progress' value={(value * 100) / (max - min)} />
         </div>
       </div>
     </div>
