@@ -1,8 +1,6 @@
 import React, { FormEvent, ReactNode, useState } from 'react';
 import round from 'lodash/round';
 import toNumber from 'lodash/toNumber';
-import add from 'lodash/add';
-import ceil from 'lodash/ceil';
 import { Progress } from 'reactstrap';
 import classNames from 'classnames';
 
