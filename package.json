@@ -3,7 +3,7 @@
   "version": "0.9.0",
   "private": false,
   "author": "Vincent Reynaud <mail@vincentreynaud.digital>",
-  "homepage": "https://vincentreynaud.github.io/genscapes",
+  "homepage": "https://genscapes.netlify.app",
   "description": "A browser app to generate drone music",
   "license": "MIT",
   "repository": {
